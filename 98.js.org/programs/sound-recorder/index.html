@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)https://98.js.org/programs/sound-recorder/index.html -->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Sound - Sound Recorder</title>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                border: 0;
+                overflow: hidden;
+                background: var(--ButtonFace);
+            }
+        </style>
+        <link href="./files/layout.css" rel="stylesheet" type="text/css">
+        <link href="./files/windows-98.css" rel="stylesheet" type="text/css">
+        <link href="./files/sound-recorder.css" rel="stylesheet" type="text/css">
+        <link rel="icon" href="https://98.js.org/images/icons/speaker-16x16.png" sizes="16x16" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/speaker-32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/speaker-48x48.png" sizes="48x48" type="image/png">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+    </head>
+    <body>
+        <script>
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                var string = msg.toLowerCase();
+                var substring = "script error";
+                if (string.indexOf(substring) > -1) {
+                    alert('Script Error: See Browser Console for Detail');
+                } else {
+                    alert('Internal application error: ' + msg + '\n\n' + 'URL: ' + url + '\n' + 'Line: ' + lineNo + '\n' + 'Column: ' + columnNo);
+                }
+                return false;
+            }
+            ;
+        </script>
+        <script src="./files/jquery.min.js"></script>
+        <script src="./files/jquery-ui.js"></script>
+        <script src="./files/recorder.js"></script>
+        <script src="./files/buffaudio.js"></script>
+        <script src="./files/browserfs.js"></script>
+        <script src="./files/filesystem-setup.js"></script>
+        <script src="./files/MenuBar.js"></script>
+        <script src="./files/$Window.js"></script>
+        <script src="./files/msgbox.js"></script>
+        <script>
+            defaultMessageBoxTitle = "Sound Recorder";
+        </script>
+        <script src="./files/AudioFile.js"></script>
+        <script src="./files/WaveDisplay.js"></script>
+        <script src="./files/app.js"></script>
+        <script src="./files/$app.js"></script>
+        <script src="./files/effects.js"></script>
+        <script src="./files/menus.js"></script>
+        <div class="menu-popup" id="menu-popup-0x8lfiol7rr" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;File-8t4c8mg03bvo" aria-labelledby="menu-button-&amp;File-8t4c8mg03bvo" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-1lcxbuovq2td" tabindex="-1" role="menuitem" aria-label="New" aria-keyshortcuts="Ctrl+N" aria-description="Creates a new sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">N</span>
+                        ew
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+N</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2r8z92juc8kp" tabindex="-1" role="menuitem" aria-label="Open" aria-keyshortcuts="Ctrl+O" aria-description="Opens an existing sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">O</span>
+                        pen
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+O</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-3zim9iy238ei" tabindex="-1" role="menuitem" aria-label="Save" aria-keyshortcuts="Ctrl+S" aria-description="Saves the active sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">S</span>
+                        ave
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+S</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-4sdw8ivz4hv" tabindex="-1" role="menuitem" aria-label="Save As" aria-keyshortcuts="Ctrl+Shift+S" aria-description="Saves the active sound with a new name.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Save <span class="menu-hotkey">A</span>
+                        s
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Shift+S</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-5n4fu44b5v1" tabindex="-1" role="menuitem" aria-label="Revert..." aria-keyshortcuts="undefined" aria-description="Reverts changes to the file.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">R</span>
+                        evert...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-6ljqyq45eqs" tabindex="-1" role="menuitem" aria-label="Properties" aria-keyshortcuts="undefined" aria-description="Shows properties for this sound file.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">P</span>
+                        roperties
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-7h9weayv8drm" tabindex="-1" role="menuitem" aria-label="Exit" aria-keyshortcuts="Alt+F4" aria-description="Quits Sound Recorder.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        E<span class="menu-hotkey">x</span>
+                        it
+                    </td>
+                    <td class="menu-item-shortcut">Alt+F4</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-9h0wu9rl2ye" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Edit-ij6h7g3iybb" aria-labelledby="menu-button-&amp;Edit-ij6h7g3iybb" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-a3xyd156xp1b" tabindex="-1" role="menuitem" aria-label="Copy" aria-keyshortcuts="Ctrl+C" aria-description="Copies something to the Clipboard">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">C</span>
+                        opy
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+C</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-btmmt2lch99" tabindex="-1" role="menuitem" aria-label="Paste Insert" aria-keyshortcuts="Ctrl+V" aria-description="Inserts the contents of the Clipboard into the sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">P</span>
+                        aste Insert
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+V</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-cs6hvx9sv52d" tabindex="-1" role="menuitem" aria-label="Paste Mix" aria-keyshortcuts="undefined" aria-description="Mixes the contents of the Clipboard into the sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Paste Mi<span class="menu-hotkey">x</span>
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-duu29k804es" tabindex="-1" role="menuitem" aria-label="Insert File..." aria-keyshortcuts="undefined" aria-description="Inserts a file into the sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">I</span>
+                        nsert File...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-ep2cficgp7oi" tabindex="-1" role="menuitem" aria-label="Mix with File" aria-keyshortcuts="undefined" aria-description="Mixes a file into the sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">M</span>
+                        ix with File
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-fb0wz0hwhzow" tabindex="-1" role="menuitem" aria-label="Delete Before Current Position" aria-keyshortcuts="undefined" aria-description="Deletes all audio before the current position.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Delete <span class="menu-hotkey">B</span>
+                        efore Current Position
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-gs0ybgmja1tk" tabindex="-1" role="menuitem" aria-label="Delete After Current Position" aria-keyshortcuts="undefined" aria-description="Deletes all audio after the current position.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Delete <span class="menu-hotkey">A</span>
+                        fter Current Position
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-hj85pqz554lo" tabindex="-1" role="menuitem" aria-label="Audio Properties" aria-keyshortcuts="undefined" aria-description="Changes microphone and speaker settings.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        A<span class="menu-hotkey">u</span>
+                        dio Properties
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-jyigrqmgw7oq" tabindex="-1" role="menu" data-semantic-parent="menu-button-Effect&amp;s-q3hkbypbfk1n" aria-labelledby="menu-button-Effect&amp;s-q3hkbypbfk1n" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-kj1jfva4sdg" tabindex="-1" role="menuitem" aria-label="Increase Volume (by 25%)" aria-keyshortcuts="undefined" aria-description="Increases the volume of the sound by 25%.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">I</span>
+                        ncrease Volume (by 25%)
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-lu2bil74091" tabindex="-1" role="menuitem" aria-label="Decrease Volume" aria-keyshortcuts="undefined" aria-description="Decreases the volume of the sound (by 25%?)">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">D</span>
+                        ecrease Volume
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-mjsw1fb7v71e" tabindex="-1" role="menuitem" aria-label="Increase Speed (by 100%)" aria-keyshortcuts="undefined" aria-description="Makes the sound all squeaky and fast.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        I<span class="menu-hotkey">n</span>
+                        crease Speed (by 100%)
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-nbdgwqopqppv" tabindex="-1" role="menuitem" aria-label="Decrease Speed" aria-keyshortcuts="undefined" aria-description="Makes your voice sound really deep and slow.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        D<span class="menu-hotkey">e</span>
+                        crease Speed
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-o67q9ticbmx5" tabindex="-1" role="menuitem" aria-label="Add echo" aria-keyshortcuts="undefined" aria-description="Adds an echo to the sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        dd echo
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-p5obvqogh9e" tabindex="-1" role="menuitem" aria-label="Reverse" aria-keyshortcuts="undefined" aria-description="Reverses the sound.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">R</span>
+                        everse
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-rh7j5g229byf" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Help-uukxnms23cy" aria-labelledby="menu-button-&amp;Help-uukxnms23cy" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-sdj8k7lxfth" tabindex="-1" role="menuitem" aria-label="Help Topics" aria-keyshortcuts="undefined" aria-description="Displays Help for the current task or command.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">H</span>
+                        elp Topics
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-teysfuolimhh" tabindex="-1" role="menuitem" aria-label="About Sound Recorder" aria-keyshortcuts="undefined" aria-description="Displays information about this application.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        bout Sound Recorder
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <!-- TODO: DRY -->
+        <svg style="position: absolute; pointer-events: none; bottom: 100%;">
+            <defs>
+                <filter id="disabled-inset-filter" x="0" y="0" width="1px" height="1px">
+                    <fecolormatrix in="SourceGraphic" type="matrix" values="
+				1 0 0 0 0
+				0 1 0 0 0
+				0 0 1 0 0
+				-2 -2 -2 4 0
+				" result="dark-parts-isolated"></fecolormatrix>
+                    <feflood result="shadow-color" flood-color="var(--ButtonShadow)"></feflood>
+                    <feflood result="hilight-color" flood-color="var(--ButtonHilight)"></feflood>
+                    <feoffset in="dark-parts-isolated" dx="1" dy="1" result="offset"></feoffset>
+                    <fecomposite in="hilight-color" in2="offset" operator="in" result="hilight-colored-offset"></fecomposite>
+                    <fecomposite in="shadow-color" in2="dark-parts-isolated" operator="in" result="shadow-colored"></fecomposite>
+                    <femerge>
+                        <femergenode in="hilight-colored-offset"></femergenode>
+                        <femergenode in="shadow-colored"></femergenode>
+                    </femerge>
+                </filter>
+            </defs>
+        </svg>
+        <script>
+            // This doesn't actually seem to be a problem in Sound Recorder
+            // but better safe than sorry.
+            window.addEventListener("resize", ()=>{
+                // work around a browser bug in Chrome where
+                // the SVG filter behaves differently based on the INITIAL zoom level
+                // (if you zoom in, the icons get cut off, if you zoom out, the effect is too thick)
+                document.getElementById("disabled-inset-filter").setAttribute("x", "0");
+            }
+            );
+        </script>
+    </body>
+</html>

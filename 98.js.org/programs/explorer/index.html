@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://98.js.org/programs/explorer/index.html -->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>(C:)</title>
+        <link href="./files/layout.css" rel="stylesheet" type="text/css">
+        <link href="./files/classic.css" rel="stylesheet" type="text/css">
+        <link href="./files/layout(1).css" rel="stylesheet" type="text/css">
+        <link href="./files/windows-98.css" rel="stylesheet" type="text/css">
+        <link rel="icon" href="./files/hard-disk-drive-16x16.png" sizes="16x16" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/explorer-32x32.png" sizes="32x32" type="image/png">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <script src="./files/jquery.min.js"></script>
+        <script src="./files/browserfs.js"></script>
+        <script src="./files/filesystem-setup.js"></script>
+        <script src="./files/MenuBar.js"></script>
+        <script src="./files/$Window.js"></script>
+        <script src="./files/msgbox.js"></script>
+        <script src="./files/iframe-windows.js"></script>
+        <script>
+            defaultMessageBoxTitle = "Explorer";
+        </script>
+        <script src="./files/helpers.js"></script>
+        <script src="./files/FolderView.js"></script>
+        <script src="./files/FolderViewItem.js"></script>
+        <script src="./files/menus.js"></script>
+        <script src="./files/explorer.js"></script>
+        <link href="./files/explorer.css" rel="stylesheet" type="text/css">
+    </head>
+    <body class="">
+        <div class="toolbars">
+            <div class="toolbar" id="menu-bar-toolbar">
+                <div class="toolbar-drag-handle"></div>
+            </div>
+            <div class="toolbar" id="standard-buttons-toolbar">
+                <div class="toolbar-drag-handle"></div>
+                <div id="standard-buttons">
+                    <div class="toolbar-compound-button-wrapper">
+                        <button class="toolbar-button lightweight back-button" disabled="disabled">
+                            <span class="label-text">Back</span>
+                            <div class="icon" style="background-position: 0px 0px;"></div>
+                        </button>
+                        <button class="toolbar-dropdown-button lightweight back-dropdown-button" disabled="disabled">
+                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                                <path style="transform:rotate(90deg);transform-origin:center" d="m6 4 4 4-4 4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="toolbar-compound-button-wrapper">
+                        <button class="toolbar-button lightweight forward-button" disabled="disabled">
+                            <span class="label-text">Forward</span>
+                            <div class="icon" style="background-position: -20px 0px;"></div>
+                        </button>
+                        <button class="toolbar-dropdown-button lightweight forward-dropdown-button" disabled="disabled">
+                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                                <path style="transform:rotate(90deg);transform-origin:center" d="m6 4 4 4-4 4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="toolbar-button lightweight up-button" disabled="disabled">
+                        <span class="label-text">Up</span>
+                        <div class="icon" style="background-position: -880px 0px;"></div>
+                    </button>
+                    <hr aria-orientation="vertical">
+                    <button class="toolbar-button lightweight cut-button">
+                        <span class="label-text">Cut</span>
+                        <div class="icon" style="background-position: -420px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight copy-button">
+                        <span class="label-text">Copy</span>
+                        <div class="icon" style="background-position: -440px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight paste-button">
+                        <span class="label-text">Paste</span>
+                        <div class="icon" style="background-position: -460px 0px;"></div>
+                    </button>
+                    <hr aria-orientation="vertical">
+                    <button class="toolbar-button lightweight undo-button">
+                        <span class="label-text">Undo</span>
+                        <div class="icon" style="background-position: -480px 0px;"></div>
+                    </button>
+                    <hr aria-orientation="vertical">
+                    <button class="toolbar-button lightweight delete-button">
+                        <span class="label-text">Delete</span>
+                        <div class="icon" style="background-position: -520px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight properties-button">
+                        <span class="label-text">Properties</span>
+                        <div class="icon" style="background-position: -620px 0px;"></div>
+                    </button>
+                    <hr aria-orientation="vertical">
+                    <div class="toolbar-compound-button-wrapper">
+                        <button class="toolbar-button lightweight cycle-view-mode-button">
+                            <span class="label-text">Views</span>
+                            <div class="icon" style="background-position: -760px 0px;"></div>
+                        </button>
+                        <button class="toolbar-dropdown-button lightweight views-dropdown-button">
+                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                                <path style="transform:rotate(90deg);transform-origin:center" d="m6 4 4 4-4 4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="internet-buttons" style="display: none;">
+                    <div class="toolbar-compound-button-wrapper">
+                        <button class="toolbar-button lightweight back-button" disabled="disabled">
+                            <span class="label-text">Back</span>
+                            <div class="icon" style="background-position: 0px 0px;"></div>
+                        </button>
+                        <button class="toolbar-dropdown-button lightweight back-dropdown-button" disabled="disabled">
+                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                                <path style="transform:rotate(90deg);transform-origin:center" d="m6 4 4 4-4 4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="toolbar-compound-button-wrapper">
+                        <button class="toolbar-button lightweight forward-button" disabled="disabled">
+                            <span class="label-text">Forward</span>
+                            <div class="icon" style="background-position: -20px 0px;"></div>
+                        </button>
+                        <button class="toolbar-dropdown-button lightweight forward-dropdown-button" disabled="disabled">
+                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                                <path style="transform:rotate(90deg);transform-origin:center" d="m6 4 4 4-4 4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="toolbar-button lightweight stop-button">
+                        <span class="label-text">Stop</span>
+                        <div class="icon" style="background-position: -40px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight refresh-button">
+                        <span class="label-text">Refresh</span>
+                        <div class="icon" style="background-position: -60px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight home-button">
+                        <span class="label-text">Home</span>
+                        <div class="icon" style="background-position: -80px 0px;"></div>
+                    </button>
+                    <hr aria-orientation="vertical">
+                    <button class="toolbar-button lightweight toggle search-button">
+                        <span class="label-text">Search</span>
+                        <div class="icon" style="background-position: -100px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight toggle favorites-button">
+                        <span class="label-text">Favorites</span>
+                        <div class="icon" style="background-position: -120px 0px;"></div>
+                    </button>
+                    <button class="toolbar-button lightweight toggle history-button">
+                        <span class="label-text">History</span>
+                        <div class="icon" style="background-position: -240px 0px;"></div>
+                    </button>
+                    <!-- <div class="toolbar-compound-button-wrapper">
+				<button class="toolbar-button lightweight mail-button" disabled>
+					<span class="label-text">Mail</span>
+				</button>
+				<button class="toolbar-dropdown-button lightweight mail-dropdown-button" disabled>
+					<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle"><path style="transform:rotate(90deg);transform-origin:center" d="m6 4 4 4-4 4z"></path></svg>
+				</button>
+			</div> -->
+                    <hr aria-orientation="vertical">
+                    <button class="toolbar-button lightweight print-button">
+                        <span class="label-text">Print</span>
+                        <div class="icon" style="background-position: -140px 0px;"></div>
+                    </button>
+                </div>
+            </div>
+            <div class="toolbar" id="address-bar-toolbar">
+                <div class="toolbar-drag-handle"></div>
+                <div id="address-bar">
+                    <!-- @TODO: d access key -->
+                    <label for="address">Address</label>
+                    <div id="address-compound-input" class="inset-deep">
+                        <img id="address-icon" width="16" height="16" src="./files/hard-disk-drive-16x16.png" alt="">
+                        <input type="text" id="address" autocomplete="off">
+                        <button id="address-dropdown-button" disabled="">
+                            <!-- Outer SVG must not have the transform, because it has a filter when disabled which would get rotated. -->
+                            <!-- @TODO: compute triangle graphics based on system metrics -->
+                            <!-- <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle;transform:rotate(90deg)"><path d="m6 7 3 3-3 3z"></path></svg> -->
+                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                                <path style="transform:rotate(90deg);transform-origin:center" d="m5 6 4 4-4 4z"></path>
+                            </svg>
+                            <!-- <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle;transform:rotate(90deg)"><path d="m6 4 5 5-5 5z"></path></svg> -->
+                        </button>
+                        <!-- TODO: functional dropdown, autocompleting file/folder paths -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="content" class="inset-deep">
+            <iframe style="min-width: 0px; min-height: 0px; flex: 1 1 1px; border: 0px;" src="./files/saved_resource.html"></iframe>
+        </div>
+        <div id="status-bar">
+            <div id="status-bar-left" class="inset-shallow">
+                <img id="status-bar-left-icon" style="display: none;" width="16" height="16" src="./files/folder-16x16.png" alt="">
+                <span id="status-bar-left-text">33 object(s)</span>
+            </div>
+            <div id="status-bar-middle" class="inset-shallow">
+                <span id="status-bar-middle-text"></span>
+            </div>
+            <div id="status-bar-right" class="inset-shallow">
+                <img id="status-bar-right-icon" style="" width="16" height="16" src="./files/my-computer-16x16.png" alt="">
+                <span id="status-bar-right-text">My Computer</span>
+            </div>
+            <!-- for menu descriptions, replace left/middle/right layout with non-inset, singular area -->
+            <div id="status-bar-simple" style="display: none;">
+                <img id="status-bar-simple-icon" width="16" height="16" src="./files/my-computer-16x16.png" alt="">
+                <span id="status-bar-simple-text"></span>
+            </div>
+        </div>
+        <!-- TODO: DRY -->
+        <svg style="position: absolute; pointer-events: none; bottom: 100%;">
+            <defs>
+                <filter id="disabled-inset-filter" x="0" y="0" width="1px" height="1px">
+                    <fecolormatrix in="SourceGraphic" type="matrix" values="
+							1 0 0 0 0
+							0 1 0 0 0
+							0 0 1 0 0
+							-2 -2 -2 4 0
+						" result="dark-parts-isolated"></fecolormatrix>
+                    <feflood result="shadow-color" flood-color="var(--ButtonShadow)"></feflood>
+                    <feflood result="hilight-color" flood-color="var(--ButtonHilight)"></feflood>
+                    <feoffset in="dark-parts-isolated" dx="1" dy="1" result="offset"></feoffset>
+                    <fecomposite in="hilight-color" in2="offset" operator="in" result="hilight-colored-offset"></fecomposite>
+                    <fecomposite in="shadow-color" in2="dark-parts-isolated" operator="in" result="shadow-colored"></fecomposite>
+                    <femerge>
+                        <femergenode in="hilight-colored-offset"></femergenode>
+                        <femergenode in="shadow-colored"></femergenode>
+                    </femerge>
+                </filter>
+            </defs>
+        </svg>
+        <script>
+            window.addEventListener("resize", ()=>{
+                // work around a browser bug in Chrome where
+                // the SVG filter behaves differently based on the INITIAL zoom level
+                // (if you zoom in, the icons get cut off, if you zoom out, the effect is too thick)
+                document.getElementById("disabled-inset-filter").setAttribute("x", "0");
+            }
+            );
+        </script>
+    </body>
+</html>

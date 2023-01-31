@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)https://98.js.org/programs/jspaint/index.html#local:b30cccf8120f4 -->
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>untitled - Paint</title>
+        <link href="./files/normalize.css" rel="stylesheet" type="text/css">
+        <link href="./files/layout.css" class="flippable-layout-stylesheet" rel="stylesheet" type="text/css">
+        <link href="./files/print.css" rel="stylesheet" type="text/css" media="print">
+        <link href="./files/layout(1).css" class="flippable-layout-stylesheet" rel="stylesheet" type="text/css">
+        <!-- <link href="lib/os-gui/windows-98.css" rel="stylesheet" type="text/css"> -->
+        <!-- <link href="lib/os-gui/windows-default.css" rel="stylesheet" type="text/css" title="Windows Default"> -->
+        <!-- <link href="lib/os-gui/peggys-pastels.css" rel="alternate stylesheet" type="text/css" title="Peggy's Pastels"> -->
+        <!-- <link href="lib/tracky-mouse/tracky-mouse.css" rel="stylesheet" type="text/css"> -->
+        <!--
+		@TODO: bring these styles into OS-GUI.
+		This is a custom build of 98.css https://github.com/jdan/98.css
+		for checkboxes, radio buttons, sliders, and fieldsets,
+		excluding e.g. scrollbars, buttons, and windows (already in OS-GUI),
+		and integrating with the theme CSS vars used by OS-GUI,
+		and with some RTLCSS tweaks.
+		Text inputs and dropdowns are styled in classic.css, but should also be included in OS-GUI at some point.
+		This is not an @import in classic.css because it needs RTLCSS and I'm not applying RTLCSS to themes yet.
+		So I added .not-for-modern logic to theme.js to exclude these styles depending on the theme.
+		-->
+        <link href="./files/98.custom-build.css" class="flippable-layout-stylesheet not-for-modern" rel="stylesheet" type="text/css">
+        <link rel="apple-touch-icon" href="https://98.js.org/programs/jspaint/images/icons/apple-icon-180x180.png">
+        <!-- Chrome will pick the largest image for some reason, instead of the most appropriate one. -->
+        <!-- <link rel="icon" type="image/png" sizes="192x192" href="images/icons/192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="images/icons/32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="images/icons/96x96.png"> -->
+        <!-- <link rel="icon" type="image/png" sizes="16x16" href="images/icons/16x16.png"> -->
+        <link rel="shortcut icon" href="https://98.js.org/programs/jspaint/favicon.ico">
+        <link rel="mask-icon" href="https://98.js.org/programs/jspaint/images/icons/safari-pinned-tab.svg" color="red">
+        <link rel="manifest" href="https://98.js.org/programs/jspaint/manifest.webmanifest">
+        <meta name="msapplication-TileColor" content="#008080">
+        <meta name="msapplication-TileImage" content="images/icons/ms-icon-144x144.png">
+        <meta name="theme-color" content="#000080">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <meta name="description" content="Classic MS Paint in the browser, with extra features">
+        <meta property="og:image:width" content="279">
+        <meta property="og:image:height" content="279">
+        <meta property="og:description" content="Classic MS Paint in the browser, with extra features.">
+        <meta property="og:title" content="JS Paint">
+        <meta property="og:url" content="https://jspaint.app">
+        <meta property="og:image" content="https://jspaint.app/images/icons/og-image-279x279.jpg">
+        <meta name="twitter:title" content="JS Paint">
+        <meta name="twitter:description" content="Classic MS Paint in the browser, with extra features">
+        <meta name="twitter:image" content="https://jspaint.app/images/meta/twitter-card-plz-no-crop.png">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@isaiahodhner">
+        <meta name="twitter:creator" content="@isaiahodhner">
+        <script>
+            // use only ES5 syntax for this script
+            // set up basic global error handling, which we can override later
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                var string = msg.toLowerCase();
+                var substring = "script error";
+                if (string.indexOf(substring) > -1) {
+                    alert('Script Error: See Browser Console for Detail');
+                } else {
+                    // try {
+                    // 	// try-catch in case of circular references or old browsers without JSON.stringify
+                    // 	error = JSON.stringify(error);
+                    // } catch (e) {}
+                    alert('Internal application error: ' + msg + '\n\n' + 'URL: ' + url + '\n' + 'Line: ' + lineNo + '\n' + 'Column: ' + columnNo);
+                }
+                return false;
+            }
+            ;
+        </script>
+        <script src="./files/theme.js"></script>
+        <link rel="stylesheet" type="text/css" href="./files/classic.css" id="theme-link">
+    </head>
+    <body>
+        <div id="about-paint" style="display: none">
+            <h1 id="about-paint-header">
+                <img src="./files/32x32.png" width="32" height="32" id="paint-32x32" alt="">
+                <span id="jspaint-project-name">JS Paint</span>
+                <!-- <small id="jspaint-version" title="expect bugs!">Alpha</small> -->
+                <button id="view-project-news">What's New?</button>
+            </h1>
+            <div id="maybe-outdated-view-project-news" hidden="">
+                <div id="maybe-outdated-line">
+                    <div id="outdated" hidden="">
+                        <div class="on-official-host">
+                            There's a new version of JS Paint. <a id="refresh-to-update" href="https://98.js.org/programs/jspaint/">Refresh</a>
+                            to get it.
+
+                        </div>
+                        <div class="on-third-party-host">
+                            This instance of JS Paint is outdated compared to <a href="https://jspaint.app/" target="_blank">jspaint.app</a>
+                            .
+
+                        </div>
+                        <div class="on-dev-host">
+                            This version of JS Paint is outdated compared to <a href="https://jspaint.app/" target="_blank">jspaint.app</a>
+                            .
+
+                        </div>
+                    </div>
+                    <div id="checking-for-updates" hidden="">Checking for updates...
+					</div>
+                    <div id="failed-to-check-if-outdated" hidden="">
+                        Couldn't check for updates.
+						<span class="navigator-offline">You're offline.</span>
+                        <span class="navigator-online">JS Paint may be outdated.</span>
+                    </div>
+                </div>
+            </div>
+            <p>
+                JS Paint is a web-based remake of MS Paint by <a href="https://isaiahodhner.io/">Isaiah Odhner</a>
+                .
+            </p>
+            <p>
+                Read about the project and extra features on <a href="https://github.com/1j01/jspaint#readme">the readme</a>
+                .
+            </p>
+            <p>
+                Request features and report bugs <a href="https://github.com/1j01/jspaint/issues">on GitHub</a>
+                or <a href="mailto:isaiahodhner@gmail.com?subject=JS%20Paint">by email</a>
+                .
+            </p>
+            <p>
+                Support the project at <a href="https://www.paypal.me/IsaiahOdhner" target="_blank">paypal.me/IsaiahOdhner</a>
+                .
+            </p>
+        </div>
+        <div id="news" hidden="">
+            <p style="padding: 8px 15px;">
+                For the latest news, visit <a href="https://jspaint.app/">jspaint.app</a>
+            </p>
+            <!-- <article class="news-entry" id="news-2021-saving">
+				<h1>The Savior Update</h1>
+				<time datetime=""></time>
+				<img width="" height="" style="max-width: 100%; height: auto; image-rendering: auto;" alt="" src=""/>
+				<p>
+					<b>Save</b> (<kbd>Ctrl+S</kbd>) can now save over the open file, in Chrome, Edge, and Opera browsers.
+					This works using new <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API">File System Access API</a>.
+					Always use <b>Save As</b> (<kbd>Ctrl+Shift+S</kbd>) if you want to save a new file.
+				</p>
+				<p>
+					<b>Save As</b> now asks for a file name and format.
+					PNG, GIF, and BMP are supported, including indexed color BMPs.
+				</p>
+				<p>
+					Tip: Use PNG if you don't have a specific reason to use another format,
+					as it has the best quality when saving.
+				</p>
+				<p>
+					If you open a BMP file with a palette, the palette is loaded into the Colors box.
+					If you load a monochrome BMP file, it loads a gradient of dither patterns into the Colors box.
+				</p>
+				<p>
+					<b>Black and White</b> mode in <b>Image > Attributes</b> is generalized to a monochrome mode
+					(although it's still called "Black and White" in the Attributes window.)
+					If an image has only two colors, when switching to "Black and White" mode,
+					it automatically adapts to these colors and gives you a gradient of dither patterns in the Colors box.
+				</p>
+				<p>
+					If you use <b>Image > Invert</b>, in monochrome mode, it flips the two colors in the image,
+					instead of changing colors to their RGB opposites.
+					(If the image is pure black and white, these two operations are equivalent.)
+				</p>
+				<p>
+					<b>Colors > Save Colors</b> also now asks for a file name and format.
+					An absurd number of file formats are supported.
+					You can even export CSS variables for use in a web design project.
+					RIFF Palette (*.pal) is compatible with MS Paint, and GIMP Palette (*.gpl) is compatible with many open source graphics programs such as Inkscape and Krita.
+				</p>
+				<p>
+					You can find lots of palettes to use on <a target="_blank" href="https://lospec.com/palette-list">Lospec</a>.
+					Download a palette as GIMP GPL (or several other formats) and use <b>Colors > Get Colors</b> and select the file,
+					or simply drag and drop the file onto JS Paint to load the palette.
+				</p>
+			</article> -->
+            <article class="news-entry" id="news-2021-saving">
+                <h1>The GUIcci Update</h1>
+                <time datetime="2021-12-08">2021-12-08</time>
+                <img width="640" height="360" style="max-width: 100%; height: auto; image-rendering: auto;" alt="" src="./files/guicii-update.png">
+                <h2>New Features</h2>
+                <p>
+                    <b>View &gt;Zoom &gt;Show Thumbnail</b>
+                    to show a preview of the image at a small size, great for pixel art.
+					Make fine, precise edits, while keeping it all in perspective.
+
+                </p>
+                <p>
+                    <b>Pinch zooming:</b>
+                    If you have a touch screen, use two fingers to zoom in and out, and pan the view.
+
+                </p>
+                <p>
+                    <b>Alt+Mousewheel</b>
+                    to zoom in and out quickly on desktop.
+					Unlike the Magnifier tool, this allows you to zoom while making (or moving) a selection, for added precision.
+
+                </p>
+                <p>
+                    Added <b>View &gt;Fullscreen</b>
+                    to toggle fullscreen mode. This is nice for using JS Paint on your phone.
+
+                </p>
+                <p>
+                    The <b>Text tool</b>
+                    now automatically expands the textbox as you type.
+					When resizing, there's now a minimum size based on the text in the textbox.
+					It previews exactly what size it will end up with when resizing.
+
+                </p>
+                <p>
+                    <b>Docking:</b>
+                    If you drag the Colors box or Tools box out into a window,
+					you can now dock it back when dragging the titlebar.
+					Previously to dock it you had to double click the titlebar, or drag it by the edge of the window.
+
+                </p>
+                <img alt="Area that you have to click to drag a toolbar out into a window (in green)" src="./files/toolbar-drag-out-area.png" width="480" height="380" style="max-width: 100%; height: auto; image-rendering: auto;">
+                <p>
+                    <b>Menus</b>
+                    are now fully keyboard (and screen reader) accessible.
+					In particular, you can hold <kbd>Alt</kbd>
+                    and press the access key of a menu button to open the menu,
+					and then (without <kbd>Alt</kbd>
+                    ) press the access key of a menu item to select it.
+					The access key of an item is the underlined letter, or the first letter of the item's text if there's no underline.
+
+                </p>
+                <p>
+                    <b>Error details</b>
+                    are now hidden by default in error dialogs.
+					The details may be more overwhelming than useful in a lot of cases,
+					but if you need them, you can expand the details.
+
+                </p>
+                <img alt="Example error message box saying &#39;File not found&#39;, with details collapsed." src="./files/file-not-found.png" width="408" height="145" style="max-width: 100%; height: auto; image-rendering: auto;">
+                <p>
+                    <b>File &gt;Exit</b>
+                    now exits to the official web desktop,
+
+                    <a target="_blank" href="https://98.js.org/">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABKklEQVR42qWTMW7DMAxFKYC+RC/hQR065xSdOyRDr9CxV8gQDzlK5g7RkLmn6CwCCimSchIoWkrAgESTj5+kHeCfFnpORCyPPiLqxgYP9gC/ZyKYEIG+CPAbn0JCr6okizmgvmdIF8BZxUhNgVdv8k3FvCdIu/u228VBnkiUGTZBzgyb1CcASBqdlhAMUEx6aAokWc8KqGCGzB+0lmMTyI0cBUmSV28zMRXzT4bECiI/l+NUZ/J0Cz0TACx6Tiwej9jfQkvIufZ8eVM1tM+1uiTHyP5P7H9IccvtxGCVSg0W6ZDUdz6cYbe8DgAHKKf3P9j8bnhQ0rSJY0DcOm2gwCFSugKqozT51V704xoDQItFWMeTFp+ZbQEGtm4o3/hsoLa1IaC3ocf/4QotsZxI//135gAAAABJRU5ErkJggg==" width="16" height="16" alt="">98.js.org
+                    </a>
+                    ,
+					a re-creation of Windows 98, full of games and applications.
+
+                </p>
+                <img class="inset-deep" src="./files/98-js-org-screenshot.png" alt="The 98.js desktop featuring desktop icons, a taskbar, and various application windows." style="max-width: 100%; height: auto; image-rendering: auto;">
+                <p>This project spun out of JS Paint, and I have implemented now
+					Sound Recorder, Notepad, Calculator, and even Windows Explorer,
+					to a high level of detail.
+				</p>
+                <p>
+                    It also includes projects from other people, other recreations of old programs,
+					like <a target="_blank" href="https://webamp.org/">Webamp</a>
+                    ,
+					a meticulous recreation of Winamp,
+					and <a href="https://github.com/rjanjic/js-solitaire">JS Solitaire</a>
+                    ,
+					a Solitaire clone (I tweaked it for accuracy, adding the card back images, etc.)
+
+                </p>
+                <h2>Pixel Perfect</h2>
+                <p>
+                    All interface elements are now thematically styled,
+					powered by <a target="_blank" href="https://os-gui.js.org/">OS-GUI.js</a>
+                    and
+					<a target="_blank" href="https://jdan.github.io/98.css/">98.css</a>
+                    .
+
+                </p>
+                <p>The whole interface is now pixel perfect accurate to Windows 98.
+
+					(Okay, there's a few things that are a pixel off or so, but seriously,
+					I lined up a screenshot and got it essentially perfect.)
+				</p>
+                <p>
+                    Improved layout of <b>View &gt;Zoom &gt;Custom Zoom</b>
+                    window, matching the design in MS Paint.
+
+                </p>
+                <p>Added padding to all dialogs so they don't feel cramped anymore.
+				</p>
+                <p>Message boxes now include warning or error icons, and play a sound when they appear.
+				</p>
+                <p>
+                    Improved <b>View &gt;View Bitmap</b>
+                    : it now uses the theme's wallpaper background color,
+					if the image is smaller than the window.
+					It now closes with a click or key press, and doesn't let you edit the image (which was weird).
+
+                </p>
+                <p>The Help window can now be minimized to the bottom of the screen, even though there's no taskbar.
+					It works like how Windows 98 does if the process managing the taskbar crashes.
+				</p>
+                <h2>Fixes</h2>
+                <p>
+                    <b>Menu buttons</b>
+                    are easier to open on a touch screen. Sometimes you had to tap twice before the menu opened.
+
+                </p>
+                <p>
+                    Fixed <b>large square brush</b>
+                    continuity (it left gaps before, due to a half-implemented optimization).
+
+                </p>
+                <p>
+                    The <b>selection and textboxes</b>
+                    no longer "blow up" if you resize them to a minimal size.
+					They are now limited when you drag an edge past the opposite edge.
+
+                </p>
+                <p>Fixed a bug where vertically thin selections were difficult or impossible to drag (despite showing a drag cursor).
+					(The draggable region was offset outside of the selection box.)
+					Fixed a similar bug where tool previews would get offset if the canvas's height was very small.
+				</p>
+                <p>Resize handles no longer get smaller when the object to resize is very small.
+					The draggable region for handles no longer gets smaller either, except in dimensions where it must.
+					It's now considerably smarter than Windows 10 about where it lets you drag handles from.
+				</p>
+                <p>
+                    In <b>Image &gt;Flip/Rotate</b>
+                    , you can now click the custom degrees input field before selecting the "Rotate by angle" option.
+
+                </p>
+                <p>The magnifier preview and other tool previews are now hidden while dragging the Colors box or Tools box.
+					It looked confusing when the magnifier preview was shown at the same time as
+					the preview outline for dragging/docking a tool window.
+				</p>
+                <p>
+                    For languages that read <b>right-to-left</b>
+                    , the History view (<b>Edit &gt;History</b>
+                    ) now uses a right-to-left layout,
+					and the color box and tool box no longer flip their layout when dragging them into a window or docking them back to a side of the application.
+
+                </p>
+                <p>
+                    The history view and error messages use <b>more localized text</b>
+                    .
+
+                </p>
+                <p>
+                    Fixed <b>cut off icons</b>
+                    in buttons in the help window toolbar in the Modern theme.
+
+                </p>
+                <p>All windows now have a default-focused control, and the last focused control in the window is remembered for when you refocus the window.
+				</p>
+                <p>
+                    <b>File &gt;New</b>
+                    and <b>File &gt;Open</b>
+                    now create a new autosave session,
+					instead of using the current session.
+
+                </p>
+                <h2>Winter Theme</h2>
+                <p>Updated the Winter theme with advent calendar-style tool buttons,
+					that reveal (improved) holiday pixel art for each tool when you select them.
+				</p>
+                <p>This means that the Winter theme is more usable,
+					since it doesn't obscure the functions of all the tools with pixel art.
+				</p>
+                <p>
+                    Also, if it doesn't feel quite enough like an advent calendar for you,
+					you can hold <kbd>Shift</kbd>
+                    to select multiple tools at once.
+
+                </p>
+                <p>Perhaps you could make a drawing using only one tool for the 16 days leading up to Christmas,
+					with exceptions for the Pick Color and Magnifier tools, of course.
+				</p>
+                <p>Snowflakes in the menus indicate what letter you can press to select that item.
+				</p>
+                <p>
+                    To disable the Winter theme, click the Grinch at the bottom of the screen,
+					who will then smile a nasty smile and steal Christmas from you.
+					You can get it back with <b>Extras &gt;Theme &gt;Winter</b>
+                    .
+
+                </p>
+                <img class="inset-deep" alt="Winter theme screenshot with candy canes and a text box saying Enjoy!" src="./files/winter-theme-enjoy.png" width="440" height="380" style="max-width: 100%; height: auto; image-rendering: auto;">
+            </article>
+            <article class="news-entry" id="news-2020-accessibility-update">
+                <h1>The Accessibility Update</h1>
+                <time datetime="2020-12-20">2020-12-20</time>
+                <img width="965" height="399" style="max-width: 100%; height: auto; image-rendering: auto;" alt="Hello in several languages, eye gaze guiding a cursor, and a sea lion barking into a microphone." src="./files/untitled-23.png">
+                <h2>Multi-Lingual Support</h2>
+                <p>JS Paint is now largely localized into 26 languages.</p>
+                <p>How am I releasing so many languages at the initial release of multi-lingual support, you may ask?
+					Well, this project has the somewhat unique opportunity to reuse localizations from an existing program, since it's primarily a remake of MS Paint.
+				</p>
+                <p>
+                    I downloaded and installed <a target="_blank" href="https://postimg.cc/4Y1V24wN">26 versions of Windows 98 in virtual machines</a>
+                    ,
+					and extracted text from mspaint.exe in each one of them,
+					using a set of scripts that I wrote to to help me automate the process.
+
+                </p>
+                <p>
+                    To change the language, go to <b>Extras &gt;Language</b>
+                    .
+					Your preferred language may already be detected, if specified in system or browser settings.
+
+                </p>
+                <img width="1280" height="720" style="max-width: 100%; height: auto; image-rendering: auto;" alt="26 languages, right off the bat!" src="./files/language-menu.png">
+                <p>For Arabic and Hebrew, right-to-left layout is supported!</p>
+                <p>I tried my hand at some Arabic calligraphy...</p>
+                <img width="1141" height="800" style="max-width: 100%; height: auto; image-rendering: auto;" alt="Calligraphy where the shapes of the tools in Paint make up Arabic words for them." src="./files/untitled-45.png">
+                <p>
+                    If you want to contribute translations, <a target="_blank" href="https://github.com/1j01/jspaint/issues/80">get in touch!</a>
+                    I need to do some technical work to set up for community translations on a public platform,
+					but I'm glad people have already expressed interest in helping translate!
+					(I also want to simplify the language in various parts of the UI before asking people to translate them.)
+
+                </p>
+                <h2>Eye Gaze Mode</h2>
+                <img width="511" height="360" style="max-width: 100%; height: auto; image-rendering: auto;" alt="You can use eye gaze or head movements to control the cursor." src="./files/20.png">
+                <p>Eye Gaze Mode lets you control JS Paint without using your hands.</p>
+                <p>It's intended for use with an eye tracker, head tracker, or other coarse input scenario.</p>
+                <p>You don't need a thousand-dollar eye tracker device to play around with this, just a webcam and some free software.</p>
+                <p>
+                    I recommend <a target="_blank" href="https://eviacam.crea-si.com/">Enable Viacam</a>
+                    , which is <em>not</em>
+                    an eye gaze tracker,
+					but rather a general video movement tracker that you can set up to track your head movement (or your torso or hand or anything else).
+
+                </p>
+                <p>
+                    Eye tracking via a webcam has a ways to go, but it's also pretty amazing in its own right.
+					Try <a target="_blank" href="https://sourceforge.net/projects/gazepointer/">GazePointer</a>
+                    .
+
+                </p>
+                <p>
+                    Eye gaze tracking requires significant calibration, and if the calibration is off,
+					it's hard to use because you can't look where you want to look to interact with things.
+					This is why I recommend head tracking (if that's an option for you),
+					because then you can freely look around, and control the cursor <em>independently</em>
+                    ,
+					so if it gets offset, you can just tilt your head a bit.
+
+                </p>
+                <p>Eye Gaze Mode is built mainly for people with movement disabilities like ALS or Cerebral Palsy,
+					but it can also just be a sort of magical experience.
+					It can also be frustrating, and takes some practice to master.
+				</p>
+                <p>
+                    A good place to start is coloring line art using just the Fill tool (<img src="./files/p_paint.gif" width="15" height="11" alt="">):
+
+                </p>
+                <ul>
+                    <li>
+                        <a target="_blank" href="https://duckduckgo.com/?t=canonical&amp;q=coloring+pages&amp;atb=v232-1&amp;iax=images&amp;ia=images">Find coloring pages online</a>
+                        ,
+						and copy and paste them into JS Paint.
+
+                    </li>
+                    <li>
+                        You can convert them to black and white in <b>Image &gt;Attributes</b>
+                        , and then switch back to Colors.
+						(This makes it work better with the Fill tool.)
+
+                    </li>
+                    <li>
+                        Enable Eye Gaze Mode with <b>Extras &gt;Eye Gaze Mode</b>
+                        and note that it will start clicking where you hover.
+						You can disable this dwell clicking with the eye icon in the bottom of the screen.
+
+                    </li>
+                    <li>
+                        Make the image fill the screen with <b>View &gt;Zoom &gt;Zoom To Window</b>
+                        .
+
+                    </li>
+                </ul>
+                <p>
+                    <span class="new">Bonus:</span>
+                    Since I implemented a vertical color box for Eye Gaze Mode,
+					I decided to make this available as a separate option. Access with <b>Extras &gt;Vertical Color Box</b>
+                    .
+
+                </p>
+                <h2>Speech Recognition</h2>
+                <img width="549" height="275" style="max-width: 100%; height: auto; image-rendering: auto;" alt="The sea lion says &quot;Art! Art! Art!&quot; into a microphone." src="./files/Art-Art-Art.png">
+                <p>Using only your voice, you can switch tools and colors, pan the view, click on buttons on the screen by name, and use most menu items.
+					You can even say "draw a cat in a party hat" to have JS Paint try to sketch a cat in a party hat.
+				</p>
+                <p>This feature pairs well with Eye Gaze Mode for a more complete hands free experience.</p>
+                <p>The feature is only available on Chrome, and only understands English.
+					Note that Chrome sends your voice to Google servers.
+				</p>
+                <p>
+                    Access with <b>Extras &gt;Speech Recognition</b>
+                    . If this option is grayed out, your browser is not supported.
+                </p>
+                <p>JS Paint will show what it thinks you said in the status bar at the bottom of the screen.</p>
+                <p>There are many synonyms for commands, and often you can do things with very short phrases like "Curve" to switch to the Curve tool.
+					If it's not recognizing your voice for short commands like "Curve" or "Cut", you may want to try longer phrases like "Curve tool" or "Cut selection",
+					as this helps it distinguish the sound as speech, rather than a cough for instance.
+				</p>
+                <h2>Edit Colors Dialog</h2>
+                <p>I also implemented the Edit Colors dialog. Previously this used the native system color picker, and didn't work for some people.</p>
+                <p>
+                    Access with <b>Colors &gt;Edit Colors</b>
+                    or double click a color in the palette to edit.
+                </p>
+                <figure>
+                    <img width="496" height="350" style="max-width: 100%; height: auto; image-rendering: auto;" src="./files/Peek-2020-12-04-00-31.gif">
+                    <figcaption>An animation morphing between JS Paint and MS Paint's color picking dialog. It's pretty close, other than the font.</figcaption>
+                </figure>
+                <p>Keyboard shortcuts are supported in this dialog, and for mobile devices with small screens, I made it treat adding custom colors as a separate screen.</p>
+                <h2>Conclusion</h2>
+                <p>JS Paint should be way more accessible now. And futuristic.
+				</p>
+                <p></p>
+                <p>Of course there's always more that could be done.
+					Eye Gaze Mode could use brush stroke smoothing, and Speech Recognition could use Artificial General Intelligence.
+				</p>
+                <p>
+                    I'd love to see people using JS Paint, especially the Eye Gaze Mode and Speech Recognition,
+					so if you record a video of using JS Paint, please
+					<a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSdGgS6TS4wBV89v8NoYHenh1eI8jYBfgwYBdPx-OaCEG5EW7g/viewform?usp=sf_link">send it to me through this form.</a>
+                    This lets me know what's actually important to people, and what's confusing,
+					and it gives me motivation to work on new features.
+
+                </p>
+            </article>
+            <article class="news-entry" id="news-2019-winter-update">
+                <h1>Winter Update</h1>
+                <time datetime="2019-12-20">2019-12-20</time>
+                <img width="563" height="334" style="max-width: 100%; height: auto; image-rendering: auto;" alt="" src="./files/2019-winter-update-candy-cane.gif">
+                <h2>Winter Theme</h2>
+                <p>
+                    A new UI skin is available, under <b>Extras &gt;Themes &gt;Winter</b>
+                    , featuring winter and holiday icons, festive fonts, and a palette with seasonal colors and peppermint patterns.
+
+                </p>
+                <img width="256" height="16" alt="" src="./files/tools.png">
+                <p>Merry Christmas and happy Hanukkah!
+				</p>
+                <h2>Better History</h2>
+                <b class="new">New:</b>
+                Jump to any point in the document's history, forwards or backwards, with <b>Edit &gt;History</b>
+                or <kbd>Ctrl+Shift+Y</kbd>
+                .
+
+                <ul>
+                    <li>Click on Text in the history view to go back to text editing.
+					</li>
+                    <li>You can return to when a selection existed.
+					</li>
+                    <li>Note: these states are skipped over with normal Undo and Redo, so you need to use the History window.
+					</li>
+                    <li>Branching history: if you undo, and then make changes, you can get back to everything.
+						Future states are preserved.
+					</li>
+                </ul>
+                <b class="bad">Warning:</b>
+                History is not saved with the autosave. Document history will be lost if you refresh the page, or close the tab, or if the tab crashes, or if you close or restart your browser, or likely if you're just on a phone and the mobile browser loses focus.
+				<h2>Improved Mobile Support</h2>
+                <p>
+                    <b class="new">New:</b>
+                    Use two fingers to pan the view.
+
+                </p>
+                <p>I recently made it easier to grab handles for resizing things.
+					With that, combined with multitouch panning,
+					JS Paint is much more useable on a phone.
+				</p>
+                <p>
+                    <b class="bad">Caveat:</b>
+                    It's slow on some devices, and parts of the interface are still too small for touch.
+                </p>
+            </article>
+            <article class="news-entry" id="news-2019-polygon-text-and-select">
+                <h1>Polygon, Text, and Select</h1>
+                <time datetime="2019-12-04">2019-12-04</time>
+                <p>Handles are now way easier to drag, with extended click targets, similar to Paint from Windows 7.
+					It's not unreasonable to use with a touch screen now!
+					This applies to selections, textboxes, and the main canvas handles.
+				</p>
+                <p>
+                    Resizing things while zoomed in is <a target="_blank" href="https://github.com/1j01/jspaint/issues/13#issuecomment-562247085">finally fixed</a>
+                    !
+
+                </p>
+                <p>
+                    The Text tool now perfectly previews the pixels that will be placed on the canvas.
+					What you see is what you get!
+					Also it retains all browser editing behavior, like spellcheck,
+					using a convoluted, yet elegant overlaying strategy.
+					(I prototyped this <a target="_blank" href="https://jsfiddle.net/1j01/wnac09u3/">here</a>
+                    and <a target="_blank" href="https://jsfiddle.net/1j01/qkvfjn1r/">here</a>
+                    if you're interested.)
+
+                </p>
+                <p>
+                    With the fill-only option selected, the Polygon tool now previews with inverted lines, like MS Paint does.
+					(When you finish the polygon, the boundary of the shape matches the preview exactly,
+					because it actually <em>does</em>
+                    draw a stroke, just the same color as the fill.)
+
+                </p>
+            </article>
+            <article class="news-entry" id="news-2019-zoom-viewport">
+                <h1>Zoom To Mouse</h1>
+                <time datetime="2019-10-26">2019-10-26</time>
+                <p>
+                    <b class="new">New:</b>
+                    The Magnifier now lets you zoom to a specific location,
+					showing a preview of the new viewport.
+
+                </p>
+                <p>Also, when zooming out with the Magnifier,
+					or changing the zoom from the toolbar or menus,
+					the top left corner of the viewport is now kept anchored.
+				</p>
+                <p>Also, pasting a selection will now go to the top left of the viewport,
+					instead of the entire document.
+				</p>
+            </article>
+            <article class="news-entry" id="news-2019-grid-zoom-cursors">
+                <h1>The Grid, Custom Zoom, and Dynamic Cursors</h1>
+                <time datetime="2019-10-09">2019-10-09</time>
+                <p>
+                    <b class="new">New:</b>
+                    The Grid. Zoom to 4x+ and use <b>View &gt;Zoom &gt;Show Grid</b>
+                    or <kbd>Ctrl+G</kbd>
+                    to enable.
+					This works with browser zoom as well to provide crisp gridlines even if you zoom in with your browser.
+
+                </p>
+                <p>
+                    <b class="new">New:</b>
+                    <b>View &gt;Zoom &gt;Custom Zoom</b>
+                    ,
+					including an actually-custom numerical zoom option, unlike MS Paint.
+
+                </p>
+                <p>
+                    <b class="new">New:</b>
+                    Dynamic cursors for brush and eraser,
+					so you now have a preview of exactly where the tool will draw.
+
+                </p>
+                <p>Also, in the event that your browser clears canvases to free up memory,
+					you should be more likely to be able to undo to get back to a useful state.
+				</p>
+            </article>
+            <article class="news-entry" id="news-2019-async-clipboard">
+                <h1>Full Clipboard Support</h1>
+                <time datetime="2019-09-21">2019-09-21</time>
+                <p>JS Paint now lets you copy real image data to the Clipboard, both with keyboard shortcuts and from the Edit menu.
+					This feature is available in Chrome 76+. Other browsers don't support it yet, as of Sep 2019.
+				</p>
+                <p>
+                    Also: paste a URL of an image, and JS Paint will load it.
+					(This is an alternative to <b>File &gt;Load from URL</b>
+                    .)
+
+                </p>
+            </article>
+            <style>
+                #news {
+                    background: white;
+                    color: black;
+                }
+
+                .news-entry {
+                    padding: 20px;
+                    max-width: 563px;
+                }
+
+                .news-entry > h1 {
+                    font-size: 1.3em;
+                    margin: 0;
+                    margin-bottom: 0.3em;
+                }
+
+                .news-entry > time {
+                    font-size: 1.2em;
+                    color: gray;
+                }
+
+                .news-entry > h2 {
+                    font-size: 1.9em;
+                    font-weight: normal;
+                    margin: 0;
+                    margin-bottom: 0.3em;
+                    margin-top: 0.3em;
+                }
+
+                .news-entry .new {
+                    color: green;
+                }
+
+                .news-entry .bad {
+                    color: #d11a29;
+                }
+            </style>
+        </div>
+        <script src="./files/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script>
+            window.jQuery || document.write('<script src="lib/jquery-3.4.1.min.js"><\/script>');
+        </script>
+        <script src="./files/gif.js"></script>
+        <script src="./files/pako-2.0.3.min.js"></script>
+        <!-- for UPNG.js and UTIF.js -->
+        <script src="./files/UPNG.js"></script>
+        <script src="./files/UTIF.js"></script>
+        <script src="./files/bmp.js"></script>
+        <script src="./files/pdf.js"></script>
+        <script src="./files/anypalette-0.6.0.js"></script>
+        <script src="./files/FileSaver.js"></script>
+        <script src="./files/font-detective.js"></script>
+        <script src="./files/libtess.min.js"></script>
+        <!-- <script src="lib/tracky-mouse/tracky-mouse.js"></script> -->
+        <script src="./files/parse-theme.js"></script>
+        <script src="./files/$Window.js"></script>
+        <script src="./files/MenuBar.js"></script>
+        <script src="./files/imagetracer_v1.2.5.js"></script>
+        <script src="./files/app-localization.js"></script>
+        <!-- must not be async/deferred, as it uses document.write(); and must come before other app code which uses localization functions -->
+        <script src="./files/msgbox.js"></script>
+        <script src="./files/functions.js"></script>
+        <script src="./files/helpers.js"></script>
+        <script src="./files/storage.js"></script>
+        <script src="./files/$Component.js"></script>
+        <script src="./files/$ToolWindow.js"></script>
+        <script>
+            // After show_error_message, showMessageBox, make_window_supporting_scale, and localize are defined,
+            // set up better global error handling.
+            // Note that this can't simply be merged with the other onerror handler with a try/catch,
+            // because showMessageBox is async, and could throw an error before dependencies are met (or if there was an error in the error handling),
+            // and try doesn't catch errors in async code. It would need to be awaited.
+            // And making show_error_message return a promise might cause subtle problems due to the pattern of `return show_error_message()`.
+            const old_onerror = window.onerror;
+            window.onerror = (message,source,lineno,colno,error)=>{
+                try {
+                    // Some errors don't give an error object, like "ResizeObserver loop limit exceeded"
+                    show_error_message(localize("Internal application error."), error || message);
+                } catch (e) {
+                    old_onerror(message, source, lineno, colno, error);
+                }
+            }
+            ;
+        </script>
+        <script src="./files/$ToolBox.js"></script>
+        <script src="./files/$ColorBox.js"></script>
+        <script src="./files/$FontBox.js"></script>
+        <script src="./files/Handles.js"></script>
+        <script src="./files/OnCanvasObject.js"></script>
+        <script src="./files/OnCanvasSelection.js"></script>
+        <script src="./files/OnCanvasTextBox.js"></script>
+        <script src="./files/OnCanvasHelperLayer.js"></script>
+        <script src="./files/image-manipulation.js"></script>
+        <script src="./files/tool-options.js"></script>
+        <script src="./files/tools.js"></script>
+        <!--<script src="src/extra-tools.js"></script>-->
+        <script src="./files/edit-colors.js"></script>
+        <script src="./files/manage-storage.js"></script>
+        <script src="./files/imgur.js"></script>
+        <script src="./files/help.js"></script>
+        <script src="./files/simulate-random-gestures.js"></script>
+        <script src="./files/menus.js"></script>
+        <script src="./files/speech-recognition.js"></script>
+        <script src="./files/app.js"></script>
+        <div class="jspaint">
+            <div class="vertical">
+                <div class="component-area top"></div>
+                <div class="horizontal">
+                    <div class="component-area left">
+                        <div class="component tools-component tall" style="touch-action: none;">
+                            <div class="tools">
+                                <div class="tool" title="Free-Form Select">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:0;"></span>
+                                </div>
+                                <div class="tool" title="Select">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:1;"></span>
+                                </div>
+                                <div class="tool" title="Eraser/Color Eraser">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:2;"></span>
+                                </div>
+                                <div class="tool" title="Fill With Color">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:3;"></span>
+                                </div>
+                                <div class="tool" title="Pick Color">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:4;"></span>
+                                </div>
+                                <div class="tool" title="Magnifier">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:5;"></span>
+                                </div>
+                                <div class="tool selected" title="Pencil">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:6;"></span>
+                                </div>
+                                <div class="tool" title="Brush">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:7;"></span>
+                                </div>
+                                <div class="tool" title="Airbrush">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:8;"></span>
+                                </div>
+                                <div class="tool" title="Text">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:9;"></span>
+                                </div>
+                                <div class="tool" title="Line">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:10;"></span>
+                                </div>
+                                <div class="tool" title="Curve">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:11;"></span>
+                                </div>
+                                <div class="tool" title="Rectangle">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:12;"></span>
+                                </div>
+                                <div class="tool" title="Polygon">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:13;"></span>
+                                </div>
+                                <div class="tool" title="Ellipse">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:14;"></span>
+                                </div>
+                                <div class="tool" title="Rounded Rectangle">
+                                    <span class="tool-icon" style="display: block; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; --icon-index:15;"></span>
+                                </div>
+                            </div>
+                            <div class="tool-options"></div>
+                        </div>
+                    </div>
+                    <div class="canvas-area inset-deep disable-aa-for-things-at-main-canvas-scale">
+                        <canvas class="main-canvas" style="touch-action: none; cursor: url(&quot;images/cursors/pencil.png&quot;) 13 23, crosshair; width: 1334px; height: 723px;" width="1334" height="723"></canvas>
+                        <div class="handle useless-handle" style="touch-action: none; left: 1336.5px; top: 0px;"></div>
+                        <div class="handle useless-handle" style="touch-action: none; left: 669.5px; top: 0px;"></div>
+                        <div class="handle useless-handle" style="touch-action: none; left: 0px; top: 0px;"></div>
+                        <div class="handle useless-handle" style="touch-action: none; left: 0px; top: 364px;"></div>
+                        <div class="handle useless-handle" style="touch-action: none; left: 0px; top: 725.5px;"></div>
+                        <div class="handle" style="touch-action: none; cursor: url(&quot;images/cursors/ns-resize.png&quot;) 16 16, s-resize; left: 669.5px; top: 725.5px;"></div>
+                        <div class="grab-region is-middle" style="cursor: url(&quot;images/cursors/ns-resize.png&quot;) 16 16, s-resize; left: 655px; width: 32px; top: 711px; height: 32px;"></div>
+                        <div class="handle" style="touch-action: none; cursor: url(&quot;images/cursors/nwse-resize.png&quot;) 16 16, se-resize; left: 1336.5px; top: 725.5px;"></div>
+                        <div class="grab-region" style="cursor: url(&quot;images/cursors/nwse-resize.png&quot;) 16 16, se-resize; left: 1322px; width: 32px; top: 711px; height: 32px;"></div>
+                        <div class="handle" style="touch-action: none; cursor: url(&quot;images/cursors/ew-resize.png&quot;) 16 16, e-resize; left: 1336.5px; top: 364px;"></div>
+                        <div class="grab-region is-middle" style="cursor: url(&quot;images/cursors/ew-resize.png&quot;) 16 16, e-resize; left: 1322px; width: 32px; top: 349.5px; height: 32px;"></div>
+                        <div class="on-canvas-object helper-layer" style="pointer-events: none; position: absolute; left: 3px; top: 3px; width: 1334px; height: 723px;">
+                            <canvas width="2668" height="1446"></canvas>
+                        </div>
+                    </div>
+                    <div class="component-area right"></div>
+                </div>
+                <div class="component-area bottom">
+                    <div class="component colors-component wide" style="touch-action: none; position: relative; margin-left: 3px;">
+                        <div class="color-box">
+                            <div class="swatch current-colors" data-color="">
+                                <canvas style="pointer-events: none;" width="28" height="29"></canvas>
+                                <div class="swatch color-selection background-color" data-color="#ffffff">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-selection foreground-color" data-color="#000000">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                            </div>
+                            <div class="palette" style="width: 224px;">
+                                <div class="swatch color-button" data-color="rgb(0,0,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,128,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,0,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,128,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,128,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,128,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,0,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,0,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,128,64)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,64,64)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,128,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,64,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(64,0,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,64,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,255,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(192,192,192)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,0,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,255,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,255,0)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,255,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,0,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,0,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,255,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(0,255,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,255,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(128,128,255)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,0,128)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                                <div class="swatch color-button" data-color="rgb(255,128,64)">
+                                    <canvas style="pointer-events: none;" width="13" height="13"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-area">
+                    <div class="status-text status-field inset-shallow">For Help, click Help Topics on the Help Menu.</div>
+                    <div class="status-coordinates status-field inset-shallow"></div>
+                    <div class="status-coordinates status-field inset-shallow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="menu-popup" id="menu-popup-04svdhwxatmk" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;File-f24gwl60clzh" aria-labelledby="menu-button-&amp;File-f24gwl60clzh" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-1ckkook635j6" tabindex="-1" role="menuitem" aria-label="New" aria-keyshortcuts="Ctrl+Alt+N" aria-description="Creates a new document.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">N</span>
+                        ew
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Alt+N</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2tuay2svvam" tabindex="-1" role="menuitem" aria-label="Open" aria-keyshortcuts="Ctrl+O" aria-description="Opens an existing document.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">O</span>
+                        pen
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+O</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-35l66lb88q5b" tabindex="-1" role="menuitem" aria-label="Save" aria-keyshortcuts="Ctrl+S" aria-description="Saves the active document.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">S</span>
+                        ave
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+S</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-4prbcqiyt4hn" tabindex="-1" role="menuitem" aria-label="Save As" aria-keyshortcuts="Ctrl+Shift+S" aria-description="Saves the active document with a new name.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Save <span class="menu-hotkey">A</span>
+                        s
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Shift+S</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-5gvij7bjgqw7" tabindex="-1" role="menuitem" aria-label="Load From URL" aria-keyshortcuts="undefined" aria-description="Opens an image from the web.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">L</span>
+                        oad From URL
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-6t4tv3qpsgpr" tabindex="-1" role="menuitem" aria-label="Upload To Imgur" aria-keyshortcuts="undefined" aria-description="Uploads the active document to Imgur">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">U</span>
+                        pload To Imgur
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-7krispaxlfk8" tabindex="-1" role="menuitem" aria-label="Manage Storage" aria-keyshortcuts="undefined" aria-description="Manages storage of previously created or opened pictures.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">Manage Storage</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-8uzahycgil6s" tabindex="-1" role="menuitem" aria-label="Print Preview" aria-keyshortcuts="undefined" aria-description="Prints the active document and sets printing options.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Print Pre<span class="menu-hotkey">v</span>
+                        iew
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-9gp5ccz94wo" tabindex="-1" role="menuitem" aria-label="Page Setup" aria-keyshortcuts="undefined" aria-description="Prints the active document and sets printing options.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Page Se<span class="menu-hotkey">t</span>
+                        up
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-anqrw1t1mhn" tabindex="-1" role="menuitem" aria-label="Print" aria-keyshortcuts="Ctrl+P" aria-description="Prints the active document and sets printing options.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">P</span>
+                        rint
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+P</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-baps5tmvwca" tabindex="-1" role="menuitem" aria-label="Set As Wallpaper (Tiled)" aria-keyshortcuts="undefined" aria-description="Tiles this bitmap as the desktop background.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Set As <span class="menu-hotkey">W</span>
+                        allpaper (Tiled)
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-cvn6is0ddcgb" tabindex="-1" role="menuitem" aria-label="Set As Wallpaper (Centered)" aria-keyshortcuts="undefined" aria-description="Centers this bitmap as the desktop background.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Set As Wallpaper (<span class="menu-hotkey">C</span>
+                        entered)
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-d5nvv4n43of4" tabindex="-1" role="menuitem" aria-label="Recent File" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">Recent File</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-e5y98k8ttdww" tabindex="-1" role="menuitem" aria-label="Exit" aria-keyshortcuts="undefined" aria-description="Quits Paint.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        E<span class="menu-hotkey">x</span>
+                        it
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-gqjyfgvarnpd" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Edit-rr1cuwyfjfr8" aria-labelledby="menu-button-&amp;Edit-rr1cuwyfjfr8" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-hhm9rw6oodlm" tabindex="-1" role="menuitem" aria-label="Undo" aria-keyshortcuts="Ctrl+Z" aria-description="Undoes the last action.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">U</span>
+                        ndo
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Z</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-ivjyghjohpj" tabindex="-1" role="menuitem" aria-label="Repeat" aria-keyshortcuts="F4" aria-description="Redoes the previously undone action.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">R</span>
+                        epeat
+                    </td>
+                    <td class="menu-item-shortcut">F4</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-jf04xxdzcfsb" tabindex="-1" role="menuitem" aria-label="History" aria-keyshortcuts="Ctrl+Shift+Y" aria-description="Shows the document history and lets you navigate to states not accessible with Undo or Repeat.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">H</span>
+                        istory
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Shift+Y</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-kyhl35sgg5sn" tabindex="-1" role="menuitem" aria-label="Cut" aria-keyshortcuts="Ctrl+X" aria-description="Cuts the selection and puts it on the Clipboard.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Cu<span class="menu-hotkey">t</span>
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+X</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-l7tb2iymbb9y" tabindex="-1" role="menuitem" aria-label="Copy" aria-keyshortcuts="Ctrl+C" aria-description="Copies the selection and puts it on the Clipboard.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">C</span>
+                        opy
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+C</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-m714see89dt9" tabindex="-1" role="menuitem" aria-label="Paste" aria-keyshortcuts="Ctrl+V" aria-description="Inserts the contents of the Clipboard.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">P</span>
+                        aste
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+V</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-nqqtij00ndbi" tabindex="-1" role="menuitem" aria-label="Clear Selection" aria-keyshortcuts="Del" aria-description="Deletes the selection.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        C<span class="menu-hotkey">l</span>
+                        ear Selection
+                    </td>
+                    <td class="menu-item-shortcut">Del</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-of8tjegopxy" tabindex="-1" role="menuitem" aria-label="Select All" aria-keyshortcuts="Ctrl+A" aria-description="Selects everything.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Select <span class="menu-hotkey">A</span>
+                        ll
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+A</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-py6sa3ly8nwr" tabindex="-1" role="menuitem" aria-label="Copy To..." aria-keyshortcuts="undefined" aria-description="Copies the selection to a file.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        C<span class="menu-hotkey">o</span>
+                        py To...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-qltdg7fd17wd" tabindex="-1" role="menuitem" aria-label="Paste From..." aria-keyshortcuts="undefined" aria-description="Pastes a file into the selection.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Paste <span class="menu-hotkey">F</span>
+                        rom...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-yjj76j4ut2oc" tabindex="-1" role="menu" data-semantic-parent="menu-popup-svbhqzr4f2f" aria-labelledby="menu-item-xdcgxck9jenb" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-zo6793j66zn" tabindex="-1" role="menuitem" aria-label="Normal Size" aria-keyshortcuts="undefined" aria-description="Zooms the picture to 100%.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">N</span>
+                        ormal Size
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-10eyek9d0u0kv" tabindex="-1" role="menuitem" aria-label="Large Size" aria-keyshortcuts="undefined" aria-description="Zooms the picture to 400%.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">L</span>
+                        arge Size
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-11ufjk08udd1q" tabindex="-1" role="menuitem" aria-label="Zoom To Window" aria-keyshortcuts="undefined" aria-description="Zooms the picture to fit within the view.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Zoom To <span class="menu-hotkey">W</span>
+                        indow
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-12sqmunj9a6ag" tabindex="-1" role="menuitem" aria-label="Custom..." aria-keyshortcuts="undefined" aria-description="Zooms the picture.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        C<span class="menu-hotkey">u</span>
+                        stom...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-13fz7rhl26ruq" tabindex="-1" role="menuitemcheckbox" aria-label="Show Grid" aria-keyshortcuts="Ctrl+G" aria-description="Shows or hides the grid.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        Show <span class="menu-hotkey">G</span>
+                        rid
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+G</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-144tayg5rdfh4" tabindex="-1" role="menuitemcheckbox" aria-label="Show Thumbnail" aria-keyshortcuts="undefined" aria-description="Shows or hides the thumbnail view of the picture.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        Show T<span class="menu-hotkey">h</span>
+                        umbnail
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-svbhqzr4f2f" tabindex="-1" role="menu" aria-owns=" menu-popup-yjj76j4ut2oc" data-semantic-parent="menu-button-&amp;View-17x69phosh2dn" aria-labelledby="menu-button-&amp;View-17x69phosh2dn" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-t13obtc23s4t" tabindex="-1" role="menuitemcheckbox" aria-label="Tool Box" aria-keyshortcuts="undefined" aria-description="Shows or hides the tool box.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">T</span>
+                        ool Box
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-uajh6t3k4lsd" tabindex="-1" role="menuitemcheckbox" aria-label="Color Box" aria-keyshortcuts="undefined" aria-description="Shows or hides the color box.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">C</span>
+                        olor Box
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-vlq96m2f1pv8" tabindex="-1" role="menuitemcheckbox" aria-label="Status Bar" aria-keyshortcuts="undefined" aria-description="Shows or hides the status bar.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">S</span>
+                        tatus Bar
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-wxdpmmguxw8" tabindex="-1" role="menuitemcheckbox" aria-label="Text Toolbar" aria-keyshortcuts="undefined" aria-description="Shows or hides the text toolbar.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        T<span class="menu-hotkey">e</span>
+                        xt Toolbar
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item has-submenu" id="menu-item-xdcgxck9jenb" tabindex="-1" role="menuitem" aria-label="Zoom" aria-keyshortcuts="undefined" aria-haspopup="true" aria-expanded="false" aria-controls="menu-popup-yjj76j4ut2oc">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">Z</span>
+                        oom
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-15bgud9ludkdl" tabindex="-1" role="menuitem" aria-label="View Bitmap" aria-keyshortcuts="Ctrl+F" aria-description="Displays the entire picture.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">V</span>
+                        iew Bitmap
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+F</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-16axsjv84yxc8" tabindex="-1" role="menuitemcheckbox" aria-label="Fullscreen" aria-keyshortcuts="F11" aria-description="Makes the application take up the entire screen.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">F</span>
+                        ullscreen
+                    </td>
+                    <td class="menu-item-shortcut">F11</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-18y2kvsjkpii" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Image-1f8qsih4laa0l" aria-labelledby="menu-button-&amp;Image-1f8qsih4laa0l" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-19v199vq13itf" tabindex="-1" role="menuitem" aria-label="Flip/Rotate" aria-keyshortcuts="undefined" aria-description="Flips or rotates the picture or a selection.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">F</span>
+                        lip/Rotate
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1ass2pmy9j9xs" tabindex="-1" role="menuitem" aria-label="Stretch/Skew" aria-keyshortcuts="undefined" aria-description="Stretches or skews the picture or a selection.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">S</span>
+                        tretch/Skew
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1bovfqm0tfjq" tabindex="-1" role="menuitem" aria-label="Invert Colors" aria-keyshortcuts="Ctrl+I" aria-description="Inverts the colors of the picture or a selection.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">I</span>
+                        nvert Colors
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+I</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1csjlw85yia6o" tabindex="-1" role="menuitem" aria-label="Attributes..." aria-keyshortcuts="Ctrl+E" aria-description="Changes the attributes of the picture.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        ttributes...
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+E</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1d72bfll3rtev" tabindex="-1" role="menuitem" aria-label="Clear Image" aria-keyshortcuts="undefined" aria-description="Clears the picture.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">C</span>
+                        lear Image
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1emnpl7ue9zh" tabindex="-1" role="menuitemcheckbox" aria-label="Draw Opaque" aria-keyshortcuts="undefined" aria-description="Makes the current selection either opaque or transparent.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">D</span>
+                        raw Opaque
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-1gjsht37g1igt" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Colors-1kcthab98h4gg" aria-labelledby="menu-button-&amp;Colors-1kcthab98h4gg" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-1hs3sa8wr1une" tabindex="-1" role="menuitem" aria-label="Edit Colors..." aria-keyshortcuts="undefined" aria-description="Creates a new color.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">E</span>
+                        dit Colors...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1ic5lm2pzgjkq" tabindex="-1" role="menuitem" aria-label="Get Colors" aria-keyshortcuts="undefined" aria-description="Uses a previously saved palette of colors.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">G</span>
+                        et Colors
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1js5w3i5oo97s" tabindex="-1" role="menuitem" aria-label="Save Colors" aria-keyshortcuts="undefined" aria-description="Saves the current palette of colors to a file.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">S</span>
+                        ave Colors
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-1lrxv7kkhyqm" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Help-1ogufgmq8jva" aria-labelledby="menu-button-&amp;Help-1ogufgmq8jva" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-1mqkpgvetjmu" tabindex="-1" role="menuitem" aria-label="Help Topics" aria-keyshortcuts="undefined" aria-description="Displays Help for the current task or command.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">H</span>
+                        elp Topics
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1n6s7ifaolv77" tabindex="-1" role="menuitem" aria-label="About Paint" aria-keyshortcuts="undefined" aria-description="Displays information about this application.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        bout Paint
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-1tjkljdy4yn9a" tabindex="-1" role="menu" data-semantic-parent="menu-popup-1pemvjscpu4o" aria-labelledby="menu-item-1shhlr6x3bx0e" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-1uydhra4pcmnq" tabindex="-1" role="menuitem" aria-label="New Session From Document" aria-keyshortcuts="undefined" aria-description="Starts a new multi-user session from the current document.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">N</span>
+                        ew Session From Document
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1vvt41kds0v7s" tabindex="-1" role="menuitem" aria-label="New Blank Session" aria-keyshortcuts="undefined" aria-description="Starts a new multi-user session from an empty document.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        New <span class="menu-hotkey">B</span>
+                        lank Session
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-1xosvm4znmk2a" tabindex="-1" role="menu" data-semantic-parent="menu-popup-1pemvjscpu4o" aria-labelledby="menu-item-1wn8khz6v2af" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-1yorsup81x54" tabindex="-1" role="menuitem" aria-label="🔙 Classic" aria-keyshortcuts="undefined" aria-description="Makes JS Paint look like MS Paint from Windows 98.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        🔙 <span class="menu-hotkey">C</span>
+                        lassic
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1zxbbmvazxh1" tabindex="-1" role="menuitem" aria-label="⬛ Dark" aria-keyshortcuts="undefined" aria-description="Makes JS Paint darker.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        ⬛ <span class="menu-hotkey">D</span>
+                        ark
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-20tpjhovtkxj" tabindex="-1" role="menuitem" aria-label="⚪ Modern" aria-keyshortcuts="undefined" aria-description="Makes JS Paint look a bit more modern.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        ⚪ <span class="menu-hotkey">M</span>
+                        odern
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-21xayi47ckex" tabindex="-1" role="menuitem" aria-label="❄️ Winter" aria-keyshortcuts="undefined" aria-description="Makes JS Paint look festive for the holidays.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        ❄️ <span class="menu-hotkey">W</span>
+                        inter
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-22ll8y980oaom" tabindex="-1" role="menuitem" aria-label="🤘 Occult" aria-keyshortcuts="undefined" aria-description="Starts the ritual.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        🤘 <span class="menu-hotkey">O</span>
+                        ccult
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-24s3d8of9pqd" tabindex="-1" role="menu" data-semantic-parent="menu-popup-1pemvjscpu4o" aria-labelledby="menu-item-23yduoi6q32b" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-25xatf4b9u6" tabindex="-1" role="menuitem" aria-label="🇪🇬 العربية" aria-keyshortcuts="undefined" aria-description="Changes the language to Arabic.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇪🇬 العربية</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-26bhaymun41qq" tabindex="-1" role="menuitem" aria-label="🇨🇿 Čeština" aria-keyshortcuts="undefined" aria-description="Changes the language to Czech.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇨🇿 Čeština</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-27k0sbfmmqafi" tabindex="-1" role="menuitem" aria-label="🇩🇰 Dansk" aria-keyshortcuts="undefined" aria-description="Changes the language to Danish.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇩🇰 Dansk</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-28xqf46tsgf0m" tabindex="-1" role="menuitem" aria-label="🇩🇪 Deutsch" aria-keyshortcuts="undefined" aria-description="Changes the language to German.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇩🇪 Deutsch</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-29fwfjcosk4cf" tabindex="-1" role="menuitem" aria-label="🇬🇷 Ελληνικά" aria-keyshortcuts="undefined" aria-description="Changes the language to Greek.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇬🇷 Ελληνικά</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2ayvruohxa8la" tabindex="-1" role="menuitem" aria-label="🇺🇸 English" aria-keyshortcuts="undefined" aria-description="Changes the language to English.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇺🇸 English</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2bz3021wsqk5" tabindex="-1" role="menuitem" aria-label="🇪🇸 Español" aria-keyshortcuts="undefined" aria-description="Changes the language to Spanish.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇪🇸 Español</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2ckvod2ajfgys" tabindex="-1" role="menuitem" aria-label="🇫🇮 Suomi" aria-keyshortcuts="undefined" aria-description="Changes the language to Finnish.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇫🇮 Suomi</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2dtq02sufc0o" tabindex="-1" role="menuitem" aria-label="🇫🇷 Français" aria-keyshortcuts="undefined" aria-description="Changes the language to French.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇫🇷 Français</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2e3v30z3zpjsb" tabindex="-1" role="menuitem" aria-label="🇮🇱 עברית" aria-keyshortcuts="undefined" aria-description="Changes the language to Hebrew.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇮🇱 עברית</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2fyerc6dj8q4" tabindex="-1" role="menuitem" aria-label="🇭🇺 Magyar" aria-keyshortcuts="undefined" aria-description="Changes the language to Hungarian.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇭🇺 Magyar</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2gdijnwsebuf8" tabindex="-1" role="menuitem" aria-label="🇮🇹 Italiano" aria-keyshortcuts="undefined" aria-description="Changes the language to Italian.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇮🇹 Italiano</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2hd0wlywc1zd8" tabindex="-1" role="menuitem" aria-label="🇯🇵 日本語" aria-keyshortcuts="undefined" aria-description="Changes the language to Japanese.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇯🇵 日本語</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2i1iaelja0z3s" tabindex="-1" role="menuitem" aria-label="🇰🇷 한국어" aria-keyshortcuts="undefined" aria-description="Changes the language to Korean.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇰🇷 한국어</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2j3eeyss6rq36" tabindex="-1" role="menuitem" aria-label="🇳🇱 Nederlands" aria-keyshortcuts="undefined" aria-description="Changes the language to Dutch.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇳🇱 Nederlands</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2kzaetktn9j5" tabindex="-1" role="menuitem" aria-label="🇳🇴 Norsk" aria-keyshortcuts="undefined" aria-description="Changes the language to Norwegian.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇳🇴 Norsk</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2losibo4nl5bh" tabindex="-1" role="menuitem" aria-label="🇵🇱 Język Polski" aria-keyshortcuts="undefined" aria-description="Changes the language to Polish.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇵🇱 Język Polski</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2m2doy4p2rogg" tabindex="-1" role="menuitem" aria-label="🇵🇹 Português" aria-keyshortcuts="undefined" aria-description="Changes the language to Portuguese.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇵🇹 Português</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2n6p658k6oq1j" tabindex="-1" role="menuitem" aria-label="🇧🇷 Português Brasileiro" aria-keyshortcuts="undefined" aria-description="Changes the language to Brazilian Portuguese.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇧🇷 Português Brasileiro</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2oy866uyvn1p" tabindex="-1" role="menuitem" aria-label="🇷🇺 Русский" aria-keyshortcuts="undefined" aria-description="Changes the language to Russian.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇷🇺 Русский</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2pflcc9ps2kwu" tabindex="-1" role="menuitem" aria-label="🇸🇰 Slovenčina" aria-keyshortcuts="undefined" aria-description="Changes the language to Slovak.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇸🇰 Slovenčina</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2qvyhqt24mkh" tabindex="-1" role="menuitem" aria-label="🇸🇮 Slovenski Jezik" aria-keyshortcuts="undefined" aria-description="Changes the language to Slovenian.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇸🇮 Slovenski Jezik</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2rorckk3zfoes" tabindex="-1" role="menuitem" aria-label="🇸🇪 Svenska" aria-keyshortcuts="undefined" aria-description="Changes the language to Swedish.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇸🇪 Svenska</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2suiqp64939v" tabindex="-1" role="menuitem" aria-label="🇹🇷 Türkçe" aria-keyshortcuts="undefined" aria-description="Changes the language to Turkish.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇹🇷 Türkçe</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2ta49hhoa00ur" tabindex="-1" role="menuitem" aria-label="🇨🇳 繁體中文" aria-keyshortcuts="undefined" aria-description="Changes the language to Traditional Chinese.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇨🇳 繁體中文</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2u4pban1xw3x" tabindex="-1" role="menuitem" aria-label="🇨🇳 简体中文" aria-keyshortcuts="undefined" aria-description="Changes the language to Simple Chinese.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🇨🇳 简体中文</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-1pemvjscpu4o" tabindex="-1" role="menu" aria-owns=" menu-popup-1tjkljdy4yn9a menu-popup-1xosvm4znmk2a menu-popup-24s3d8of9pqd" data-semantic-parent="menu-button-E&amp;xtras-327pvdja3ur4" aria-labelledby="menu-button-E&amp;xtras-327pvdja3ur4" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table" role="presentation">
+                <tr class="menu-row menu-item" id="menu-item-1qnp7hp9fyc6" tabindex="-1" role="menuitem" aria-label="⌚ History" aria-keyshortcuts="Ctrl+Shift+Y" aria-description="Shows the document history and lets you navigate to states not accessible with Undo or Repeat.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        ⌚ <span class="menu-hotkey">H</span>
+                        istory
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Shift+Y</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-1rouaaihc5vu" tabindex="-1" role="menuitem" aria-label="🎞️ Render History As GIF" aria-keyshortcuts="Ctrl+Shift+G" aria-description="Creates an animation from the document history.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        🎞️ <span class="menu-hotkey">R</span>
+                        ender History As GIF
+                    </td>
+                    <td class="menu-item-shortcut">Ctrl+Shift+G</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item has-submenu" id="menu-item-1shhlr6x3bx0e" tabindex="-1" role="menuitem" aria-label="👥 Multi-User" aria-keyshortcuts="undefined" aria-haspopup="true" aria-expanded="false" aria-controls="menu-popup-1tjkljdy4yn9a">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        👥 <span class="menu-hotkey">M</span>
+                        ulti-User
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item has-submenu" id="menu-item-1wn8khz6v2af" tabindex="-1" role="menuitem" aria-label="💄 Themes" aria-keyshortcuts="undefined" aria-haspopup="true" aria-expanded="false" aria-controls="menu-popup-1xosvm4znmk2a">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        💄 <span class="menu-hotkey">T</span>
+                        hemes
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item has-submenu" id="menu-item-23yduoi6q32b" tabindex="-1" role="menuitem" aria-label="🌍 Language" aria-keyshortcuts="undefined" aria-haspopup="true" aria-expanded="false" aria-controls="menu-popup-24s3d8of9pqd">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        🌍 <span class="menu-hotkey">L</span>
+                        anguage
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2v93scysojkwg" tabindex="-1" role="menuitemcheckbox" aria-label="👁️ Eye Gaze Mode" aria-keyshortcuts="undefined" aria-description="Enlarges buttons and provides dwell clicking.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        👁️ <span class="menu-hotkey">E</span>
+                        ye Gaze Mode
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2w39h07ejjsx2" tabindex="-1" role="menuitemcheckbox" aria-label="🎙️ Speech Recognition" aria-keyshortcuts="undefined" aria-description="Controls the application with voice commands.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        🎙️ <span class="menu-hotkey">S</span>
+                        peech Recognition
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2x3lsmsbgran1" tabindex="-1" role="menuitemcheckbox" aria-label="↕️ Vertical Color Box" aria-keyshortcuts="undefined" aria-description="Arranges the color box vertically.">
+                    <td class="menu-item-checkbox-area checkbox"></td>
+                    <td class="menu-item-label">
+                        ↕️ <span class="menu-hotkey">V</span>
+                        ertical Color Box
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2yufke6sgw5l" tabindex="-1" role="menuitem" aria-label="🗃️ Manage Storage" aria-keyshortcuts="undefined" aria-description="Manages storage of previously created or opened pictures.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">🗃️ Manage Storage</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2z8k3tyrit79r" tabindex="-1" role="menuitem" aria-label="📢 Project News" aria-keyshortcuts="undefined" aria-description="Shows news about JS Paint.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">📢 Project News</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-309vbnbad2u5w" tabindex="-1" role="menuitem" aria-label="ℹ️ GitHub" aria-keyshortcuts="undefined" aria-description="Shows the project on GitHub.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">ℹ️ GitHub</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-31ml718otido" tabindex="-1" role="menuitem" aria-label="💵 Donate" aria-keyshortcuts="undefined" aria-description="Supports the project.">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">💵 Donate</td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="window os-window tool-window component-window focused" id="os-window-6gu2367nz" style="touch-action: none; position: absolute; z-index: 5; display: none; left: 17px; top: 0px;">
+            <div class="window-titlebar" style="touch-action: none;">
+                <div class="window-title-area">
+                    <span class="window-title">Tools</span>
+                </div>
+                <button class="window-close-button window-action-close window-button" aria-label="Close window">
+                    <span class="window-button-icon"></span>
+                </button>
+            </div>
+            <div class="window-content vertical" tabindex="-1" style="outline: none; contain: none;"></div>
+        </div>
+        <div class="window os-window tool-window component-window focused" id="os-window-fnjz1z864" style="touch-action: none; position: absolute; z-index: 6; display: none; left: 17px; top: 0px;">
+            <div class="window-titlebar" style="touch-action: none;">
+                <div class="window-title-area">
+                    <span class="window-title">Colors</span>
+                </div>
+                <button class="window-close-button window-action-close window-button" aria-label="Close window">
+                    <span class="window-button-icon"></span>
+                </button>
+            </div>
+            <div class="window-content horizontal" tabindex="-1" style="outline: none; contain: none;"></div>
+        </div>
+        <script src="./files/sessions.js"></script>
+        <script src="./files/konami.js"></script>
+        <script src="./files/vaporwave-fun.js"></script>
+        <script>
+            if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
+                document.write('<style>body { text-align: center; }</style>' + '<div className="not-supported">' + '<h1 className="not-supported-header">Internet Explorer is not supported!</h1>' + '<p className="not-supported-details">Try Chrome, Firefox, or Edge.</p>' + '</div>');
+            }
+        </script>
+        <noscript>
+            <h1>
+                <img src="images/icons/32x32.png" width="32" height="32" alt=""/>JS Paint
+            </h1>
+            <p>This application requires JavaScript to run.</p>
+            <p>
+                Assuming this is the official instance of jspaint,
+				at <a href="https://jspaint.app">https://jspaint.app</a>
+                ,
+				you can safely enable JavaScript.
+
+            </p>
+            <p>
+                You can also check out <a href="https://github.com/1j01/jspaint">the source code and project info</a>
+                .
+            </p>
+        </noscript>
+        <svg style="position: absolute; pointer-events: none; bottom: 100%;">
+            <defs>
+                <filter id="disabled-inset-filter" x="0" y="0" width="1px" height="1px">
+                    <fecolormatrix in="SourceGraphic" type="matrix" values="
+							1 0 0 0 0
+							0 1 0 0 0
+							0 0 1 0 0
+							-1000 -1000 -1000 1 0
+						" result="black-parts-isolated"></fecolormatrix>
+                    <feflood result="shadow-color" flood-color="var(--ButtonShadow)"></feflood>
+                    <feflood result="hilight-color" flood-color="var(--ButtonHilight)"></feflood>
+                    <feoffset in="black-parts-isolated" dx="1" dy="1" result="offset"></feoffset>
+                    <fecomposite in="hilight-color" in2="offset" operator="in" result="hilight-colored-offset"></fecomposite>
+                    <fecomposite in="shadow-color" in2="black-parts-isolated" operator="in" result="shadow-colored"></fecomposite>
+                    <femerge>
+                        <femergenode in="hilight-colored-offset"></femergenode>
+                        <femergenode in="shadow-colored"></femergenode>
+                    </femerge>
+                </filter>
+                <filter id="disabled-inset-filter-2" x="0" y="0" width="1px" height="1px">
+                    <fecolormatrix in="SourceGraphic" type="matrix" values="
+							1 0 0 0 0
+							0 1 0 0 0
+							0 0 1 0 0
+							-1 -1 -0 1 0
+						" result="black-and-blue-parts-isolated"></fecolormatrix>
+                    <feflood result="shadow-color" flood-color="var(--ButtonShadow)"></feflood>
+                    <feflood result="hilight-color" flood-color="var(--ButtonHilight)"></feflood>
+                    <feoffset in="black-and-blue-parts-isolated" dx="1" dy="1" result="offset"></feoffset>
+                    <fecomposite in="hilight-color" in2="offset" operator="in" result="hilight-colored-offset"></fecomposite>
+                    <fecomposite in="shadow-color" in2="black-and-blue-parts-isolated" operator="in" result="shadow-colored"></fecomposite>
+                    <femerge>
+                        <femergenode in="hilight-colored-offset"></femergenode>
+                        <femergenode in="shadow-colored"></femergenode>
+                    </femerge>
+                </filter>
+            </defs>
+        </svg>
+        <div class="window os-window dialog-window save-as focused" id="os-window-7kelw0a8i" style="touch-action: none; position: absolute; z-index: 9; left: 522.523px; top: 345.5px;">
+            <div class="window-titlebar" style="touch-action: none;">
+                <div class="window-title-area">
+                    <span class="window-title">Save As</span>
+                </div>
+                <button class="window-close-button window-action-close window-button" aria-label="Close window">
+                    <span class="window-button-icon"></span>
+                </button>
+            </div>
+            <div class="window-content" style="outline: none;">
+                <form>
+                    <div>
+                        <label>
+                            File name:
+					<input type="text" class="file-name inset-deep">
+                        </label>
+                        <label>
+                            Save as type:
+
+                            <select class="file-type-select inset-deep">
+                                <option value="image/png">PNG (*.png)</option>
+                                <option value="image/webp">WebP (*.webp)</option>
+                                <option value="image/gif">GIF (*.gif)</option>
+                                <option value="image/tiff">TIFF (*.tif;*.tiff)</option>
+                                <option value="image/jpeg">JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)</option>
+                                <option value="image/x-bmp-1bpp">Monochrome Bitmap (*.bmp;*.dib)</option>
+                                <option value="image/x-bmp-4bpp">16 Color Bitmap (*.bmp;*.dib)</option>
+                                <option value="image/x-bmp-8bpp">256 Color Bitmap (*.bmp;*.dib)</option>
+                                <option value="image/bmp">24-bit Bitmap (*.bmp;*.dib)</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="button-group">
+                        <button>Save</button>
+                        <button>Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

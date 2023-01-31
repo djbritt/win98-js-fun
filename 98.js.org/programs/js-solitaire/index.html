@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)https://98.js.org/programs/js-solitaire/index.html -->
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="./src/layout.css" rel="stylesheet" type="text/css">
+        <link href="./src/windows-98.css" rel="stylesheet" type="text/css">
+        <link href="./src/solitaire.css" rel="stylesheet" type="text/css">
+        <link rel="icon" href="https://98.js.org/images/icons/solitaire-16x16.png" sizes="16x16" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/solitaire-32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/solitaire-48x48.png" sizes="48x48" type="image/png">
+        <title>Solitaire</title>
+    </head>
+    <body style="--background-position-facing-down:-355px -384px;">
+        <div class="solitaire inset-deep" id="js-solitaire">
+            <div class="size-limit">
+                <div class="upper" id="js-upper">
+                    <div id="js-deck-pile" class="deck__pile upper__spacer">
+                    </div>
+                    <div id="js-deck-deal" class="deck__deal upper__spacer"></div>
+                    <div class="upper__spacer"></div>
+                    <div class="aces aces--0"></div>
+                    <div class="aces aces--1"></div>
+                    <div class="aces aces--2"></div>
+                    <div class="aces aces--3"></div>
+                </div>
+                <div id="js-board" class="board-deck">
+                </div>
+            </div>
+        </div>
+        <script src="./src/jquery.min.js"></script>
+        <script src="./src/MenuBar.js"></script>
+        <script src="./src/$Window.js"></script>
+        <script src="./src/msgbox.js"></script>
+        <script>
+            defaultMessageBoxTitle = "Solitaire";
+        </script>
+        <script src="./src/menus.js"></script>
+        <div class="menu-popup" id="menu-popup-0qxx4oz06oon" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Game-5bj941lgyh5v" aria-labelledby="menu-button-&amp;Game-5bj941lgyh5v" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-1spk1uoylpv8" tabindex="-1" role="menuitem" aria-label="Deal" aria-keyshortcuts="F2" aria-description="Deal a new game">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">D</span>
+                        eal
+                    </td>
+                    <td class="menu-item-shortcut">F2</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2q908i00pkwg" tabindex="-1" role="menuitem" aria-label="Deck..." aria-keyshortcuts="undefined" aria-description="Choose new deck back">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        De<span class="menu-hotkey">c</span>
+                        k...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-3dhsdq12db19" tabindex="-1" role="menuitem" aria-label="Options..." aria-keyshortcuts="undefined" aria-description="Change Solitaire options">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">O</span>
+                        ptions...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-49p67pzhsj24" tabindex="-1" role="menuitem" aria-label="Exit" aria-keyshortcuts="undefined" aria-description="Exit Solitaire">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        E<span class="menu-hotkey">x</span>
+                        it
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-6nl2l1tx1di" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Help-89h9zajd19n" aria-labelledby="menu-button-&amp;Help-89h9zajd19n" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-7ttubhpk3myi" tabindex="-1" role="menuitem" aria-label="About Solitaire..." aria-keyshortcuts="undefined" aria-description="About Solitaire">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        bout Solitaire...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <script src="./src/index.js"></script>
+    </body>
+</html>

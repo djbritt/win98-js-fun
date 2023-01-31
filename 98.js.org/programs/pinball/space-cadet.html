@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)https://98.js.org/programs/pinball/space-cadet.html -->
+<html lang="en-us">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>3D Pinball for Windows - Space Cadet</title>
+        <link href="./files/layout.css" rel="stylesheet" type="text/css">
+        <link href="./files/windows-98.css" rel="stylesheet" type="text/css">
+        <link rel="icon" href="https://98.js.org/images/icons/pinball-16x16.png" sizes="16x16" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/pinball-32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/pinball-48x48.png" sizes="48x48" type="image/png">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                background-color: black;
+                color: white;
+                /* font-family: Tahoma, Geneva, Verdana, sans-serif; */
+            }
+
+            /* textarea.emscripten {
+			font-family: monospace;
+			width: 80%;
+		} */
+            canvas.emscripten {
+                border: 0 none;
+                background-color: #000;
+                z-index: 1;
+            }
+
+            canvas.emscripten, #overlay-canvas {
+                position: absolute;
+                top: -12px;
+                left: 0;
+            }
+
+            #overlay-canvas {
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            #overlay-img {
+                /* should not have pointer-events: none;
+			as it is serving the purpose not just of covering up the ImGui menus,
+			but blocking them from being clicked */
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 3;
+            }
+
+            .menus {
+                position: relative;
+                z-index: 4;
+            }
+
+            #canvas-container {
+                position: relative;
+                margin: auto;
+                width: 600px;
+                height: 416px;
+                contain: strict;
+                clip-path: inset(0 0 0 0);
+            }
+
+            #status {
+                margin: 40px 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="./files/MenuBar.js"></script>
+        <script src="./files/jquery.min.js"></script>
+        <script src="./files/$Window.js"></script>
+        <script src="./files/msgbox.js"></script>
+        <div id="canvas-container">
+            <div class="emscripten" id="status" style="display: none;"></div>
+            <div class="emscripten">
+                <progress value="0" max="1" id="progress" hidden="" style="display: none;"></progress>
+            </div>
+            <!-- tabindex=0 lets os-gui know to focus this control when refocusing the window, e.g. when closing the menus -->
+            <canvas class="emscripten" id="canvas" style="outline: 0px; cursor: default;" oncontextmenu="event.preventDefault()" tabindex="0" width="600" height="440"></canvas>
+            <!-- This overlay canvas is for freezing the display while the menus are open (especially the non-thematic ImGui menus). -->
+            <canvas id="overlay-canvas" width="600" height="440"></canvas>
+            <!-- This overlay image covers up the bit of the ImGui menus that are rendered over the game (visually and functionally). -->
+            <img id="overlay-img" draggable="false" src="./files/pinball-overlay.png" style="">
+            <div style="position: absolute; left: 183px; top: 0px; width: 183px; bottom: 0px; display: block; z-index: 10; touch-action: none;"></div>
+        </div>
+        <!--<textarea class="emscripten" id="output" rows="8"></textarea>-->
+        <script>
+            document.getElementById("canvas").getContext("webgl", {
+                preserveDrawingBuffer: true
+            });
+            // to allow screenshot for freeze frame
+
+            function gameLoaded() {
+                let event_name = "game-loaded";
+                if (Module.SDL2) {
+                    document.getElementById("overlay-img").style.display = "";
+                } else {
+                    event_name = "game-load-failed";
+                }
+                // Send an event for hiding the splash screen
+                try {
+                    frameElement?.dispatchEvent(new CustomEvent(event_name));
+                } catch (e) {
+                    console.warn(`error dispatching ${event_name} event: `, e);
+                }
+                if (!Module.SDL2) {
+                    return;
+                }
+                // set up audio muting
+                var audioContext = Module.SDL2.audioContext;
+                var gainNode = audioContext.createGain();
+                window.mute_game_audio = function() {
+                    gainNode.gain.value = 0;
+                }
+                ;
+                window.unmute_game_audio = function() {
+                    gainNode.gain.value = 1;
+                }
+                ;
+                gainNode.connect(audioContext.destination);
+                Module.SDL2.audio.scriptProcessorNode.disconnect();
+                Module.SDL2.audio.scriptProcessorNode.connect(gainNode);
+            }
+
+            window.alert = (message)=>{
+                const {$window} = showMessageBox({
+                    title: "3D Pinball",
+                    message,
+                    iconID: "error",
+                    // alert will only happen for a fatal error
+                });
+
+                // the emscripten app is overzealously preventing default behavior for events,
+                // so we need to handle this default button behavior manually
+                $window.$content.on("keydown", "button", (event)=>{
+                    if (event.key === "Enter") {
+                        event.currentTarget.click();
+                    }
+                }
+                ).on("keyup", "button", (event)=>{
+                    if (event.key === " ") {
+                        event.currentTarget.click();
+                    }
+                }
+                );
+            }
+            ;
+
+            // setTimeout(()=> {
+            // 	alert("TEST message.\n\nApparently it doesn't get centered without a delay.");
+            // }, 500);
+
+            var statusElement = document.getElementById('status');
+            var progressElement = document.getElementById('progress');
+
+            var Module = {
+                preRun: [],
+                postRun: [gameLoaded],
+                print: (function() {
+                    var element = document.getElementById('output');
+                    if (element)
+                        element.value = '';
+                    // clear browser cache
+                    return function(text) {
+                        if (arguments.length > 1)
+                            text = Array.prototype.slice.call(arguments).join(' ');
+                        // These replacements are necessary if you render to raw HTML
+                        //text = text.replace(/&/g, "&amp;");
+                        //text = text.replace(/</g, "&lt;");
+                        //text = text.replace(/>/g, "&gt;");
+                        //text = text.replace('\n', '<br>', 'g');
+                        console.log(text);
+                        /*if (element) {
+						element.value += text + "\n";
+						element.scrollTop = element.scrollHeight; // focus on bottom
+					}*/
+                    }
+                    ;
+                }
+                )(),
+                printErr: function(text) {
+                    if (arguments.length > 1)
+                        text = Array.prototype.slice.call(arguments).join(' ');
+                    console.error(text);
+                },
+                canvas: (function() {
+                    var canvas = document.getElementById('canvas');
+
+                    // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+                    // application robust, you may want to override this behavior before shipping!
+                    // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+                    canvas.addEventListener("webglcontextlost", function(e) {
+                        alert('WebGL context lost. You will need to reload the page.');
+                        e.preventDefault();
+                    }, false);
+
+                    return canvas;
+                }
+                )(),
+                setStatus: function(text) {
+                    if (!Module.setStatus.last)
+                        Module.setStatus.last = {
+                            time: Date.now(),
+                            text: ''
+                        };
+                    if (text === Module.setStatus.last.text)
+                        return;
+
+                    var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                    var now = Date.now();
+                    if (m && now - Module.setStatus.last.time < 30)
+                        return;
+                    // if this is a progress update, skip it if too soon
+                    Module.setStatus.last.time = now;
+                    Module.setStatus.last.text = text;
+                    if (m) {
+                        text = m[1];
+                        progressElement.value = parseInt(m[2]) * 100;
+                        progressElement.max = parseInt(m[4]) * 100;
+                        progressElement.hidden = false;
+                    } else {
+                        progressElement.value = null;
+                        progressElement.max = null;
+                        progressElement.hidden = true;
+
+                        var canvas = document.getElementById('canvas');
+                        canvas.style.display = "";
+                    }
+                    statusElement.innerHTML = text;
+
+                    if (text === "") {
+                        statusElement.style.display = "none";
+                        progressElement.style.display = "none";
+                    } else {
+                        statusElement.style.display = "";
+                        progressElement.style.display = "";
+                    }
+                },
+                totalDependencies: 0,
+                monitorRunDependencies: function(left) {
+                    this.totalDependencies = Math.max(this.totalDependencies, left);
+                    Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+                }
+            };
+            Module.setStatus('Downloading...');
+            window.onerror = function() {
+                Module.setStatus('Exception thrown, see JavaScript console');
+                Module.setStatus = function(text) {
+                    if (text)
+                        Module.printErr('[post-exception status] ' + text);
+                }
+                ;
+            }
+            ;
+        </script>
+        <script async="" src="./files/SpaceCadetPinball.js"></script>
+        <script src="./files/space-cadet-menus.js"></script>
+        <div class="menu-popup" id="menu-popup-0ma0w7oot3j" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Game-755vulqe6pdl" aria-labelledby="menu-button-&amp;Game-755vulqe6pdl" style="touch-action: pan-y; outline: none; display: none; position: absolute; left: 0px; top: 19px;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-1c6sx7xu0kue" tabindex="-1" role="menuitem" aria-label="New Game" aria-keyshortcuts="F2">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">N</span>
+                        ew Game
+                    </td>
+                    <td class="menu-item-shortcut">F2</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-2xa678b6jx6r" tabindex="-1" role="menuitem" aria-label="Launch Ball" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">L</span>
+                        aunch Ball
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-3597m3m0zqwa" tabindex="-1" role="menuitem" aria-label="Pause/Resume Game" aria-keyshortcuts="F3">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">P</span>
+                        ause/Resume Game
+                    </td>
+                    <td class="menu-item-shortcut">F3</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-460cvu134cxk" tabindex="-1" role="menuitem" aria-label="High Scores..." aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">H</span>
+                        igh Scores...
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-54wivnz265s3" tabindex="-1" role="menuitem" aria-label="Demo" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">D</span>
+                        emo
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-6g3h94x56kg" tabindex="-1" role="menuitem" aria-label="Exit" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        E<span class="menu-hotkey">x</span>
+                        it
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-b6d8x8kp7sy4" tabindex="-1" role="menu" data-semantic-parent="menu-popup-855k0is8qfmt" aria-labelledby="menu-item-a67tobdrh82p" style="touch-action: pan-y; outline: none; display: none;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-c26ur9wukn54" tabindex="-1" role="menuitemcheckbox" aria-label="1 Player" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                            <path d="M5 7v3l2 2 5-5V4L7 9Z"></path>
+                        </svg>
+                    </td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">1</span>
+                        Player
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-dxo2y3fdbwkn" tabindex="-1" role="menuitemcheckbox" aria-label="2 Players" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                            <path d="M5 7v3l2 2 5-5V4L7 9Z"></path>
+                        </svg>
+                    </td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">2</span>
+                        Players
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-e7mft4fs1dcu" tabindex="-1" role="menuitemcheckbox" aria-label="3 Players" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                            <path d="M5 7v3l2 2 5-5V4L7 9Z"></path>
+                        </svg>
+                    </td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">3</span>
+                        Players
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-ff0xa83mj52" tabindex="-1" role="menuitemcheckbox" aria-label="4 Players" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                            <path d="M5 7v3l2 2 5-5V4L7 9Z"></path>
+                        </svg>
+                    </td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">4</span>
+                        Players
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-855k0is8qfmt" tabindex="-1" role="menu" aria-owns=" menu-popup-b6d8x8kp7sy4" data-semantic-parent="menu-button-&amp;Options-i88g64euyqwc" aria-labelledby="menu-button-&amp;Options-i88g64euyqwc" style="touch-action: pan-y; outline: none; display: none; position: absolute; left: 42.6797px; top: 19px;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-9p26ghali2o" tabindex="-1" role="menuitem" aria-label="Full Screen" aria-keyshortcuts="F4">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">F</span>
+                        ull Screen
+                    </td>
+                    <td class="menu-item-shortcut">F4</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row menu-item has-submenu" id="menu-item-a67tobdrh82p" tabindex="-1" role="menuitem" aria-label="Select Players" aria-keyshortcuts="undefined" aria-haspopup="true" aria-expanded="false" aria-controls="menu-popup-b6d8x8kp7sy4">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        Select <span class="menu-hotkey">P</span>
+                        layers
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area">
+                        <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                            <path d="m6 4 4 4-4 4z"></path>
+                        </svg>
+                    </td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-gq8ta1gawqa" tabindex="-1" role="menuitemcheckbox" aria-label="Audio" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="fill:currentColor;display:inline-block;vertical-align:middle">
+                            <path d="M5 7v3l2 2 5-5V4L7 9Z"></path>
+                        </svg>
+                    </td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        udio
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-hh0eb396uncs" tabindex="-1" role="menuitem" aria-label="Player Controls" aria-keyshortcuts="F8">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        P<span class="menu-hotkey">l</span>
+                        ayer Controls
+                    </td>
+                    <td class="menu-item-shortcut">F8</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="menu-popup" id="menu-popup-jz3fq5c7kofr" tabindex="-1" role="menu" data-semantic-parent="menu-button-&amp;Help-mv1qc08tei3" aria-labelledby="menu-button-&amp;Help-mv1qc08tei3" style="touch-action: pan-y; outline: none; display: none; position: absolute; left: 94.0391px; top: 19px;">
+            <table class="menu-popup-table">
+                <tr class="menu-row menu-item" id="menu-item-kfj061qv3afn" tabindex="-1" role="menuitem" aria-label="Help Topics" aria-keyshortcuts="F1">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">H</span>
+                        elp Topics
+                    </td>
+                    <td class="menu-item-shortcut">F1</td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+                <tr class="menu-row">
+                    <td colspan="4">
+                        <hr class="menu-hr">
+                    </td>
+                </tr>
+                <tr class="menu-row menu-item" id="menu-item-ld7jcv4tyx0l" tabindex="-1" role="menuitem" aria-label="About Pinball" aria-keyshortcuts="undefined">
+                    <td class="menu-item-checkbox-area"></td>
+                    <td class="menu-item-label">
+                        <span class="menu-hotkey">A</span>
+                        bout Pinball
+                    </td>
+                    <td class="menu-item-shortcut"></td>
+                    <td class="menu-item-submenu-area"></td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>

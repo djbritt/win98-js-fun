@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://98.js.org/programs/minesweeper/index.html -->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Minesweeper</title>
+        <link href="./files/layout.css" rel="stylesheet" type="text/css">
+        <link href="./files/windows-98.css" rel="stylesheet" type="text/css">
+        <link rel="icon" href="https://98.js.org/images/icons/minesweeper-16x16.png" sizes="16x16" type="image/png">
+        <link rel="icon" href="https://98.js.org/images/icons/minesweeper-32x32.png" sizes="32x32" type="image/png">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <script src="./files/MenuBar.js"></script>
+        <script src="./files/jquery.min.js"></script>
+        <script src="./files/$Window.js"></script>
+        <script src="./files/msgbox.js"></script>
+        <script>
+            defaultMessageBoxTitle = "Minesweeper";
+        </script>
+        <script src="./files/rocket.12.06.js"></script>
+        <script src="./files/seedrandom.js"></script>
+        <script src="./files/konami.js"></script>
+        <script src="./files/menus.js"></script>
+        <script src="./files/minesweeper.js"></script>
+        <script src="./files/tile.js"></script>
+        <script src="./files/face.js"></script>
+        <script src="./files/grid.js"></script>
+        <script src="./files/ssd.js"></script>
+        <script src="./files/fun.js"></script>
+        <style>
+            body, #play_area {
+                margin: 0;
+                padding: 0;
+                background-color: #bdbdbd;
+                margin: auto;
+            }
+
+            * {
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="play_area">
+            <table cellspacing="0" cellpadding="0" style="border: 1px solid rgb(68, 68, 68); width: 278px; box-shadow: rgb(153, 153, 153) 3px 3px 6px 1px; margin: auto; cursor: default;">
+                <tbody>
+                    <tr>
+                        <td style="width: 10px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 10px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -26px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 10px; height: 32px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td colspan="16" style="background-color: rgb(192, 192, 192);">
+                            <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 53px; text-align: center;">
+                                            <div style="width: 39px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -46px -81px; padding: 1px; margin: auto;">
+                                                <table cellspacing="0" cellpadding="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <div style="width: 13px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -32px;"></div>
+                                                            </td>
+                                                            <td>
+                                                                <div style="width: 13px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -52px -32px;"></div>
+                                                            </td>
+                                                            <td>
+                                                                <div style="width: 13px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -32px;"></div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <div style="width: 26px; height: 26px; margin: auto; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -55px;"></div>
+                                        </td>
+                                        <td style="width: 53px; text-align: center;">
+                                            <div style="width: 39px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -46px -81px; padding: 1px; margin: auto;">
+                                                <table cellspacing="0" cellpadding="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <div style="width: 13px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -32px;"></div>
+                                                            </td>
+                                                            <td>
+                                                                <div style="width: 13px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -13px -32px;"></div>
+                                                            </td>
+                                                            <td>
+                                                                <div style="width: 13px; height: 23px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -26px -32px;"></div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td style="width: 10px; height: 32px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 10px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -91px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -81px;"></td>
+                        <td style="width: 10px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -26px -91px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td colspan="16" rowspan="16">
+                            <table cellspacing="0" cellpadding="0">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                        <td style="width: 16px; height: 16px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -16px;"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                        <td style="height: 16px; width: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -36px -81px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 10px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: 0px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 16px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -10px -101px;"></td>
+                        <td style="width: 10px; height: 10px; background-image: url(&quot;files/sprite.png&quot;); background-repeat: no-repeat; background-position: -26px -101px;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

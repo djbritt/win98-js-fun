@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+		
+		<title>Folder Template</title>
+		
+		
+	
+
+
+	
+		<!-- allow references to any resources you might add to the folder -->
+		<!-- (a "webbot" is a special wrapper for FrontPage compatibility) -->
+		<!-- webbot bot="HTMLMarkup" tag="base" startspan -->
+		<!--<base href="https://98.js.org/programs/explorer/index.html/">--><base href=".">
+		<!-- webbot bot="HTMLMarkup" endspan -->
+
+		<script>(() => { /* make top level return valid */
+
+			/*var*/ window.L_Prompt_Text	= "Select an item to view its description.";
+			/*var*/ window.L_Multiple_Text	= " items selected.";
+			/*var*/ window.L_Size_Text		= "Size: ";
+			/*var*/ window.L_FileSize_Text	= "Total File Size: ";
+			/*var*/ window.L_Delimiter_Text	= ",";
+			/*var*/ window.L_Bytes_Text	= "&nbsp;bytes";
+			/*var*/ window.L_Attributes_Text	= "Attributes";
+			/*var*/ window.L_Codes_Text	= "RHSaCE"; // suppress the Archive flag
+			/*var*/ window.L_ReadOnly_Text 	= "Read-only";
+			/*var*/ window.L_Hidden_Text	= "Hidden";
+			/*var*/ window.L_System_Text	= "System";
+			/*var*/ window.L_Archive_Text	= "Archive";
+			/*var*/ window.L_Compressed_Text	= "Compressed";
+			/*var*/ window.L_Encrypted_Text	= "Encrypted";
+			/*var*/ window.L_NoAttributes_Text = "(normal)";
+			/*var*/ window.L_Properties_Text	= "P&roperties";
+			/*var*/ window.timer		= 0;
+			/*var*/ window.wantMedia		= false; // cool, but may hinder media file manipulation
+
+			function FixSize() {
+				// this function handles fixed panel sizing and collapsing when the window resizes
+				/*var*/ window.threshold	= 400;
+				/*var*/ window.miniHeight	= 32;
+				/*var*/ window.ch		= document.body.clientHeight;
+				/*var*/ window.cw		= document.body.clientWidth;
+
+				if (cw < threshold) {
+					document.all.Panel.style.visibility = "hidden";
+					document.all.MiniBanner.style.visibility = "visible";
+					document.all.FileList.style.top = miniHeight;
+					document.all.FileList.style.pixelLeft = 0;
+				} else {
+					document.all.MiniBanner.style.visibility = "hidden";
+					document.all.Panel.style.visibility = "visible";
+					document.all.FileList.style.top = 0;
+					document.all.FileList.style.pixelLeft = document.all.Panel.style.pixelWidth; 
+				}
+				document.all.FileList.style.pixelWidth = cw - document.all.FileList.style.pixelLeft;
+				document.all.FileList.style.pixelHeight = ch - document.all.FileList.style.pixelTop;
+			}
+
+			function FormatNumber(n) {
+				/*var*/ window.t = "";
+				/*var*/ window.i, j = 0;
+				for (i = n.length - 1; i >= 0; i--) {
+					t = n.charAt(i) + t;
+					if (i && ((++j % 3) == 0))
+						t = L_Delimiter_Text + t;
+				}
+				return t;
+			}
+
+			function Properties() {
+				FileList.SelectedItems().Item(0).InvokeVerb(L_Properties_Text);
+			}
+
+			function Init() {
+				// call our FixSize() function whenever the window gets resized
+				window.onresize = FixSize;
+				FixSize();
+				Info.innerHTML = L_Prompt_Text;
+			}
+		
+window.FixSize = FixSize;
+window.FormatNumber = FormatNumber;
+window.Properties = Properties;
+window.Init = Init;
+
+})();</script>
+
+		<script>addEventListener("SelectionChanged", (event) => {
+
+			// this script updates the left info panel when you select icons
+			/*var*/ window.fldr = FileList.Folder;
+			/*var*/ window.items = undefined;
+			/*var*/ window.name = undefined;
+			/*var*/ window.data = undefined;
+			/*var*/ window.text = undefined;
+			/*var*/ window.title = undefined;
+			/*var*/ window.size = 0;
+			/*var*/ window.i = undefined;
+
+			// cancel any pending status message
+			if (timer) {
+				window.clearTimeout(timer);
+				timer = 0;
+			}
+
+			// erase any visible thumbnail since the selection changed
+			document.all.Thumbnail.style.display = "none";
+			document.all.Status.style.display = "none";
+
+			// stop & destroy any media player
+			if (wantMedia)
+				document.all.Media.innerHTML = "";
+
+			data = FileList.SelectedItems().Count;
+			if (data == 0) {
+				// nothing selected?
+				Info.innerHTML = L_Prompt_Text;
+				return;
+			}
+			else if (data > 1) {
+				// more than one item selected?
+				text = data + L_Multiple_Text + "<br>";
+				if (data <= 100) {
+					for (i = 0; i < data; i++)
+						size += FileList.SelectedItems().Item(i).Size;
+					if (size)
+						text += "<br>" + L_FileSize_Text + FormatNumber(size.toString()) + L_Bytes_Text + "<br>";
+					if (data <= 16)
+						for (i = 0; i < data; i++)
+							text += "<br>" + FileList.SelectedItems().Item(i).Name;
+				}
+				Info.innerHTML = text;
+				return;
+			}
+
+			items = FileList.SelectedItems().Item(0);
+
+			// name
+			name = fldr.GetDetailsOf(items, 0);
+			text = "<b>" + name + "</b>";
+
+			// type
+			data = fldr.GetDetailsOf(items, 2);
+			if (data)
+				text += "<br>" + data;
+
+			// date
+			data = fldr.GetDetailsOf(items, 3);
+			if (data)
+				text += "<br><br>" + fldr.GetDetailsOf(null, 3) + ":<br>" + data;
+
+			// size
+			size = FileList.SelectedItems().Item(0).Size;
+			if (size && size < 1000)
+				text += "<br><br>" + L_Size_Text + size + L_Bytes_Text;
+			else {
+				data = fldr.GetDetailsOf(items, 1);
+				if (data)
+					text += "<br><br>" + fldr.GetDetailsOf(null, 1) + ": " + data;
+                                else if (size)
+					text += "<br><br>" + L_Size_Text + FormatNumber(size.toString()) + L_Bytes_Text;
+			}
+
+			// extra details?
+			for (i = 4; i < 10; i++) {
+				title = fldr.GetDetailsOf(null, i);
+				if (!title)
+					break;
+				data = fldr.GetDetailsOf(items, i);
+				if (title == L_Attributes_Text) {
+					/*var*/ window.code = undefined;
+					/*var*/ window.s = "";
+
+					text += "<br><br>" + title.link("JavaScript:onClick=Properties()") + ": ";
+					for (i = 0; i < 6; i++) {
+						code = L_Codes_Text.charAt(i);
+						if (data.indexOf(code) > -1) {
+							if (s)
+								s += ", ";
+							if (i == 0)
+								s += L_ReadOnly_Text;
+							else if (i == 1)
+								s += L_Hidden_Text;
+							else if (i == 2)
+								s += L_System_Text;
+							else if (i == 3)
+								s += L_Archive_Text;
+							else if (i == 4)
+								s += L_Compressed_Text;
+							else if (i == 5)
+								s += L_Encrypted_Text;
+						}
+					}
+					if (!s)
+						s = L_NoAttributes_Text;
+					text += s;
+				}
+				else if (data)
+					text += "<br><br>" + title + ":<br>" + data;
+			}
+
+			// tip?
+			data = fldr.GetDetailsOf(items, -1);
+			if (data && data != name) {
+				/*var*/ window.start = undefined;
+				/*var*/ window.end = undefined;
+				/*var*/ window.theLink = undefined;
+				/*var*/ window.a = undefined;
+
+				// parse lines for Office files without breaking links below
+				a = data.split("\n");
+				data = a.join("<br>\n");
+
+				// look for embedded links
+				text += "<br><br>";
+				start = data.indexOf("http://");
+				if (start < 0)
+					start = data.indexOf("file://");
+				if (start < 0)
+					text += data;
+				else {
+					end = data.indexOf(" ", start);
+					if (end < 0)
+						end = data.length;
+					if (start > 0)
+						text += data.substring(0, start - 1);
+					theLink = data.substring(start, end);
+					text += theLink.link(theLink);
+					if (end < data.length)
+						text += data.substring(end + 1, data.length);
+				}
+			}
+
+			// replace Info with the new text
+			Info.innerHTML = text;
+
+			if (wantMedia && size) {
+				// show media preview or thumbnail based on file extension
+				ext = name.substring(name.lastIndexOf(".") + 1, name.length);
+				ext = ext.toLowerCase();		
+				if (ext == 'avi' || ext == 'mov' || ext == 'qt' || ext == 'mpe' || ext == 'mpeg' || ext == 'mpg') {
+					// show a movie player
+					document.all.Media.innerHTML = '<object-hack ID="Player" style="width: 160px; height: 148px" classid=clsid:05589FA1-C356-11CE-BF01-00AA0055595A><param-hack name="FileName" value="' + items.Path + '"><param-hack name=ShowDisplay value=0><param-hack name=BorderStyle value=0></object-hack>';
+				} else if (ext == 'aif' || ext == 'aifc' || ext == 'aiff' || ext == 'au' || ext == 'mid' || ext == 'rmi' || ext == 'snd' || ext == 'wav') {
+					// show a sound player
+					document.all.Media.innerHTML = '<object-hack ID="Player" style="width: 160px; height: 28px" classid=clsid:05589FA1-C356-11CE-BF01-00AA0055595A><param-hack name="FileName" value="' + items.Path + '"><param-hack name=ShowDisplay value=0></center></object-hack>'
+				}
+			}
+
+			// try to generate a new thumbnail asynchronously, and delay the status message one second
+			if (size && (size < 10000000) && Thumbnail.displayFile(items.Path))
+				timer = window.setTimeout('document.all.Status.style.display = ""', 1000);
+		
+
+});</script>
+
+		<script>addEventListener("OnThumbnailReady", (event) => {
+
+			// when a valid thumbnail has been generated, display it
+			window.clearTimeout(timer);
+			timer = 0;
+			document.all.Status.style.display = "none";
+			if (document.all.Thumbnail.haveThumbnail() && document.all.Media.innerHTML == "")
+				document.all.Thumbnail.style.display = "";
+		
+
+});</script>
+		
+		
+		
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no">
+		<script src="https://98.js.org/lib/jquery.min.js"></script>
+		<script src="https://98.js.org/lib/os-gui/$Window.js"></script>
+		<script src="https://98.js.org/src/msgbox.js"></script>
+		<script>defaultMessageBoxTitle = "Explorer";</script>
+		<script>
+			(() => {
+		// Usually the scripts refer to "document.all.FileList", but sometimes use just "FileList",
+		// relying on the fact that IDs pollute the global namespace.
+		// FileList is a built-in API nowadays, so it conflicts.
+		Object.defineProperty(window, "FileList", {
+			get() { return document.getElementById("FileList"); }
+		});
+
+		// It uses pixelWidth/pixelHeight/pixelLeft/pixelTop and unitless top/left
+		// Originally I polyfilled this on `style`, but it broke `setProperty()` in Firefox (and maybe Chrome but it doesn't seem to come up as a problem somehow?)
+		// so I've changed it to a separate `styleHack` property, making the generality of this solution rather pointless.
+		// It was an interesting exercise.
+		var real_style_descriptor = Reflect.getOwnPropertyDescriptor(HTMLElement.prototype, "style");
+		Object.defineProperty(HTMLElement.prototype, "styleHack", {
+			get: function () {
+				const element = this;
+				const style = real_style_descriptor.get.call(element);
+				return new Proxy(style, {
+					get: function (target, prop, receiver) {
+						// Not sure how these should behave for different values of box-sizing (if that was even around back then)
+						if (prop === "pixelWidth") {
+							return Math.round(element.offsetWidth);
+						}
+						if (prop === "pixelHeight") {
+							return Math.round(element.offsetHeight);
+						}
+						if (prop === "pixelLeft") {
+							return Math.round(element.offsetLeft);
+						}
+						if (prop === "pixelTop") {
+							return Math.round(element.offsetTop);
+						}
+						return Reflect.get(style, prop, style);
+					},
+					set: function (target, prop, value) {
+						if (prop === "pixelWidth") {
+							target.width = value + "px";
+							return;
+						}
+						if (prop === "pixelHeight") {
+							target.height = value + "px";
+							return;
+						}
+						if (prop === "pixelLeft" || (prop === "left" && `${value}`.match(/^\d+$/))) {
+							target.left = value + "px";
+							return;
+						}
+						if (prop === "pixelTop" || (prop === "top" && `${value}`.match(/^\d+$/))) {
+							target.top = value + "px";
+							return;
+						}
+						return Reflect.set(style, prop, value);
+					},
+				});
+			},
+			set: function (value) {
+				const element = this;
+				element.style.cssText = value;
+			},
+			configurable: true,
+			enumerable: true,
+		});
+
+		// Fix up ancient CSS in <style> and <link> tags.
+		// Based on https://github.com/philipwalton/talks/tree/b0a2b9a3de509dd39368516e7e304a4159b41b08/2016-12-02/demos/src
+		const getPageStyles = () => {
+			// Query the document for any element that could have styles.
+			var styleElements =
+				[...document.querySelectorAll('style, link[rel="stylesheet"]')];
+
+			// Fetch all styles and ensure the results are in document order.
+			// Resolve with a single string of CSS text.
+			return Promise.all(styleElements.map((el) => {
+				if (el.href) {
+					return fetch(el.href).then((response) => response.text());
+				} else {
+					return el.innerText;
+				}
+			})).then((stylesArray) => stylesArray.join('\n'));
+		};
+		const replacePageStyles = (css) => {
+			// Get a reference to all existing style elements.
+			const existingStyles =
+				[...document.querySelectorAll('style, link[rel="stylesheet"]')];
+
+			// Create a new <style> tag with all the polyfilled styles.
+			const polyfillStyles = document.createElement('style');
+			polyfillStyles.innerHTML = css;
+			document.head.appendChild(polyfillStyles);
+
+			// Remove the old styles once the new styles have been added.
+			existingStyles.forEach((el) => el.parentElement.removeChild(el));
+		};
+		getPageStyles().then((css) => {
+			css = css.replace(/padding:\s*((\d+(?:\.?\d+)?\w+),\s*)/g, (match, value) => value.split(/,\s*/g).join(" "));
+			css = css.replace(/font:\s*(\d+pt);/, "font-size: $1; line-height: 1;");
+			css = css.replace(/font:\s*((\d+pt)(\s*\/\s*\d+pt)?) verdana;/, "font: $1 'verdana', sans-serif;");
+			css = css.replace(/style\.(pixel(Width|Height|Left|Top)|left|top)\b/g, "styleHack.$1");
+
+			replacePageStyles(css);
+		});
+
+		// Neither Chrome or Firefox are working for debugging srcdoc iframes.
+		// Chrome gives wildly incorrect line numbers,
+		// and Firefox just gives "Error loading this URI: Unknown source"
+		// or sometimes it opens view-source:about:srcdoc in a new tab ("Hmm. That address doesn’t look right.")
+		// Firefox also surprisingly actually works sometimes, but it's not reliable.
+		// Luckily, onerror seems to work in both browsers.
+		addEventListener("error", (event) => {
+			const { $window } = showMessageBox({
+				message: "An error occurred.",
+			});
+			// $window.$content.append(`
+			// 	<details>
+			// 		<summary>Details</summary>
+			// 		<pre class='error-pre inset-deep'></pre>
+			// 		<pre class='location-pre inset-deep'></pre>
+			// 	</details>
+			// `)
+			$window.$content.append(`
+				<pre class='error-pre inset-deep'></pre>
+				<pre class='location-pre inset-deep'></pre>
+			`)
+			$window.$content.find("pre")
+				.css({
+					overflow: "auto",
+					maxHeight: 400,
+					textAlign: "left",
+					background: "var(--Window)",
+					color: "var(--WindowText)",
+					margin: 10,
+					padding: 5,
+					userSelect: "text",
+					cursor: "auto",
+					// whiteSpace: "pre-wrap",
+				});
+
+			$window.$content.find(".error-pre").text(event.error);
+
+			const srcdoc = frameElement.srcdoc;
+			const lines = srcdoc.split(/\r\n|\r|\n/g);
+
+			$window.$content.find(".location-pre").append(
+				lines.map((line, index) =>
+					$("<div>").text(
+						// ((index + 1 == event.lineno) ? "--->" : "    ") +
+						(index + 1 + "").padStart(4, " ") + ": " + line
+					).css({
+						background: (index + 1 == event.lineno) ? "var(--Hilight)" : "",
+						color: (index + 1 == event.lineno) ? "var(--HilightText)" : "",
+						width: "1000%", // because ugh highlight doesn't extend to whole line if it scrolls
+					})
+				)
+					.slice(event.lineno - 5, event.lineno + 4)
+			);
+		});
+
+		// Allow message boxes to go outside the window.
+		showMessageBox = parent.showMessageBox || showMessageBox;
+
+		// Implement <object-hack>, which we'll convert <object ...> to.
+		class ObjectHack extends HTMLElement {
+			constructor() {
+				super();
+				this.attachShadow({ mode: 'open' });
+				this._params_slot = document.createElement("slot");
+				this.shadowRoot.append(this._params_slot);
+				this._params = {};
+				this._params_slot.addEventListener("slotchange", (event) => {
+					this._params = {};
+					for (const param_el of this.querySelectorAll("param, param-hack")) {
+						this._params[param_el.getAttribute("name")] = param_el.getAttribute("value");
+					}
+					// console.log("slotchange, params are now:", this._params);
+				});
+			}
+			connectedCallback() {
+				// @TODO: handle params once they change/exist
+				// console.log(this._params, this.children, this._params_slot.children);
+				// console.log(`this.getAttribute("classid")`, this.getAttribute("classid"));
+				switch (this.getAttribute("classid")) {
+					case "clsid:1D2B4F40-1F10-11D1-9E88-00C04FDCAB92":
+						// thumbnail
+						const img = document.createElement("img");
+						img.draggable = false;
+						this.shadowRoot.append(img);
+						this.haveThumbnail = () => {
+							return false;
+						};
+						this.displayFile = (path) => {
+							img.src = path;
+						}
+						break;
+					case "clsid:E5DF9D10-3B52-11D1-83E8-00A0C90DC849":
+						// folder icon
+						{
+							const img = document.createElement("img");
+							img.draggable = false;
+							this.shadowRoot.append(img);
+							img.src = frameElement._folder_icon_src;
+						}
+						break;
+					case "clsid:1820FED0-473E-11D0-A96C-00C04FD705A2":
+						// folder view
+						const folder_view = frameElement._folder_view;
+						this.shadowRoot.append(folder_view.element);
+						// jQuery's append does HTML, vs native which does Text
+						$(this.shadowRoot).append(`
+							<link href="/layout.css" rel="stylesheet" type="text/css">
+							<link href="/classic.css" rel="stylesheet" type="text/css">
+							<link href="/lib/os-gui/layout.css" rel="stylesheet" type="text/css">
+							<link href="/lib/os-gui/windows-98.css" rel="stylesheet" type="text/css">
+							<style>
+								:host {
+									display: flex;
+								}
+								.folder-view {
+									background: var(--Window); /* needed for mix-blend-mode */
+									color: var(--WindowText);
+								}
+								.desktop-icon .title {
+									/* background: transparent; */
+									/* mix-blend-mode seems to need a background (for the dotted focus effect) */
+									background: var(--Window);
+									color: var(--WindowText);
+								}
+							</style>
+						`);
+
+						this.SelectedItems = () => {
+							const selected_items = folder_view.items.filter((item) => item.element.classList.contains("selected"));
+							return {
+								Count: selected_items.length,
+								Item: (index) => {
+									const item = selected_items[index];
+									if (!item) {
+										return {}; // ???
+									}
+									return {
+										Name: item.element.querySelector(".title").textContent,
+										Size: item.resolvedStats?.size,
+										Path: item.file_path,
+										_item: item,
+									};
+								},
+							};
+						};
+						// These keys may actually be different depending on the system folder.
+						// My Computer (MYCOMP.HTT) seems to use 1 for Type
+						const detail_key = {
+							"-1": "Tip", // description of the item, for control panel items, computers, and printers
+							0: "Name",
+							1: "Size", // file size as a string
+							2: "Type", // file type
+							3: "Modified", // modification date
+						};
+						this.Folder = {
+							GetDetailsOf: (item, detail_id) => {
+								// console.log("GetDetailsOf", item, detail_id);
+								// return `{GetDetailsOf(${JSON.stringify(item)}, ${detail_id})}`; // debugging in the style of a broken template
+								if (item == null) {
+									return detail_key[detail_id];
+								} else if (Object.keys(item).length === 0) {
+									return "";
+								} else {
+									switch (detail_key[detail_id]) {
+										case "Tip":
+											return item._item.description || "";
+										case "Name":
+											return item.Name;
+										case "Size":
+											const bytes = item._item.resolvedStats?.size;
+											if (typeof bytes !== "number") {
+												return "";
+											}
+											// Note: Windows 98 uses 2^10 for KB, and uses KB as the minimum unit,
+											// but the folder templates, wanting to use bytes for small files,
+											// show the size in bytes if it's less than 1000, implying it uses 10^3 for KB.
+											// This may confuse people, but I'm just imitating Windows 98. No skin off my back!
+											const k = 1024;
+											if (bytes === 0) return '0KB';
+											const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+											const min_unit = 1; // Start at KB (note that the default template works around this to provide "bytes")
+											const i = Math.max(min_unit, Math.floor(Math.log(bytes) / Math.log(k)));
+											return Math.ceil(bytes / Math.pow(k, i)) + sizes[i]; // Round up
+										case "Type":
+											// @TODO: DRY, and move file type code/data to one central place
+											const system_folder_path_to_name = {
+												"/": "(C:)", //"My Computer",
+												"/my-pictures/": "My Pictures",
+												"/my-documents/": "My Documents",
+												"/network-neighborhood/": "Network Neighborhood",
+												"/desktop/": "Desktop",
+												"/programs/": "Program Files",
+												"/recycle-bin/": "Recycle Bin",
+											};
+											if (system_folder_path_to_name[item._item.file_path]) {
+												return "System Folder";
+											}
+											if (item._item.resolvedStats?.isDirectory?.()) {
+												return "Folder";
+											}
+											const match = item._item.file_path.match(/\.(\w+)?$/);
+											if (match) {
+												return match[1].toUpperCase() + " File";
+											} else {
+												return "Unknown File";
+											}
+										case "Modified":
+											return new Date(item._item.resolvedStats?.mtime).toLocaleString()
+												.replace(/, (\d+):(\d+):(\d+)/, " $1:$2"); // Remove the comma and seconds place (doing this as one replace to hopefully not affect other locales negatively)
+										default:
+											console.warn("Unknown detail ID", detail_id);
+											return;
+									}
+								}
+							}
+						};
+						break;
+					case "clsid:05589FA1-C356-11CE-BF01-00AA0055595A":
+						// media player
+						const video = document.createElement("video"); // @TODO: or audio
+						video.src = params.FileName;
+						video.controls = true;
+						this.shadowRoot.append(video);
+						break;
+					default:
+						console.warn("Unsupported classid value:", this.getAttribute("classid"), this);
+						break;
+				}
+			}
+		}
+		customElements.define("object-hack", ObjectHack);
+	})();
+		</script>
+	
+
+	<style>[dir=rtl] dd {
+	margin: 0 30pt 0 0;
+}
+
+[dir=rtl] menu {
+	margin: 14pt 30pt 14pt 0;
+}
+
+[dir=rtl] ol {
+	margin: 14pt 30pt 14pt 0;
+}
+
+[dir=rtl] ul {
+	margin: 14pt 30pt 14pt 0;
+}
+
+a {
+	color: #00F;
+	text-decoration: underline;
+}
+
+a:visited {
+	color: #80080;
+}
+
+address {
+	display: block;
+	font-style: italic;
+}
+
+b {
+	font-weight: bold;
+}
+
+bdo {
+	direction: rtl;
+	unicode-bidi: bidi-override;
+}
+
+blockquote {
+	display: block;
+	margin: 14pt 30pt;
+}
+
+body {
+	display: block;
+	margin: 15px 10px;
+	zoom: 1;
+}
+
+button {
+	background-color: #D4D0C8;
+	border-style: outset;
+	border-width: 2px;
+	font-family: sans-serif;
+	font-size: 10pt;
+	overflow: hidden;
+	text-align: center;
+	zoom: 1;
+}
+
+caption {
+	display: block;
+	padding: 1px 3px 5px;
+	text-align: center;
+	zoom: 1;
+}
+
+cite {
+	font-style: italic;
+}
+
+code {
+	font-family: monospace;
+	font-size: 10pt;
+}
+
+col {
+	border-color: #D4D0C8;
+	display: block;
+}
+
+colgroup {
+	border-color: #D4D0C8;
+	display: block;
+}
+
+dd {
+	display: block;
+	margin: 0 0 0 30pt;
+}
+
+del {
+	text-decoration: line-through;
+}
+
+dfn {
+	font-style: italic;
+}
+
+div {
+	display: block;
+}
+
+dl {
+	display: block;
+	margin: 14pt 0;
+}
+
+dt {
+	display: block;
+}
+
+em {
+	font-style: italic;
+}
+
+embed {
+	zoom: 1;
+}
+
+fieldset {
+	border-style: groove;
+	border-width: 2px;
+	display: block;
+	zoom: 1;
+}
+
+form {
+	display: block;
+	margin: 14pt 0;
+}
+
+h1 {
+	display: block;
+	font-size: 24pt;
+	font-weight: bold;
+	margin: 14pt 0;
+}
+
+h2 {
+	display: block;
+	font-size: 18pt;
+	font-weight: bold;
+	margin: 14pt 0;
+}
+
+h3 {
+	display: block;
+	font-size: 13.55pt;
+	font-weight: bold;
+	margin: 14pt 0;
+}
+
+h4 {
+	display: block;
+	font-weight: bold;
+	margin: 14pt 0;
+}
+
+h5 {
+	display: block;
+	font-size: 10pt;
+	font-weight: bold;
+	margin: 14pt 0;
+}
+
+h6 {
+	display: block;
+	font-size: 7.55pt;
+	font-weight: bold;
+	margin: 14pt 0;
+}
+
+hr {
+	text-align: center;
+	zoom: 1;
+}
+
+html {
+	overflow-x: auto;
+	overflow-y: scroll;
+	zoom: 1;
+}
+
+i {
+	font-style: italic;
+}
+
+iframe {
+	background-color: #FFF;
+	height: 150px;
+	width: 300px;
+	zoom: 1;
+}
+
+img {
+	zoom: 1;
+}
+
+input {
+	background-color: #FFF;
+	border-style: inset;
+	border-width: 2px;
+	font-family: sans-serif;
+	font-size: 10pt;
+	overflow: hidden;
+	padding: 1px;
+	zoom: 1;
+}
+
+ins {
+	text-decoration: underline;
+}
+
+kbd {
+	font-family: monospace;
+	font-size: 10pt;
+}
+
+legend {
+	zoom: 1;
+}
+
+li {
+	display: block;
+}
+
+menu {
+	display: block;
+	list-style-image: none;
+	list-style-position: outside;
+	list-style-type: disc;
+	margin: 14pt 0 14pt 30pt;
+}
+
+object {
+	zoom: 1;
+}
+
+ol {
+	display: block;
+	list-style-image: none;
+	list-style-position: outside;
+	list-style-type: decimal;
+	margin: 14pt 0 14pt 30pt;
+}
+
+optgroup {
+	font-family: sans-serif;
+	font-size: 10pt;
+	font-style: italic;
+	font-weight: bold;
+}
+
+option {
+	font-family: sans-serif;
+	font-size: 10pt;
+	font-style: italic;
+	font-weight: bold;
+}
+
+p {
+	display: block;
+	margin: 14pt 0;
+}
+
+pre {
+	display: block;
+	font-family: monospace;
+	font-size: 10pt;
+	white-space: pre;
+}
+
+rp {
+	font-size: 6pt;
+}
+
+rt {
+	font-size: 6pt;
+}
+
+samp {
+	font-family: monospace;
+	font-size: 10pt;
+}
+
+select {
+	border-color: #FFF;
+	border-style: inset;
+	border-width: 2px;
+	font-family: sans-serif;
+	font-size: 10pt;
+	zoom: 1;
+}
+
+small {
+	font-size: 10pt;
+}
+
+strong {
+	font-weight: bold;
+}
+
+sub {
+	font-size: 10pt;
+}
+
+sup {
+	font-size: 10pt;
+}
+
+table {
+	border-color: #D4D0C8;
+	display: block;
+	zoom: 1;
+}
+
+tbody {
+	border-color: #D4D0C8;
+	display: block;
+}
+
+td {
+	border-color: #D4D0C8;
+	display: block;
+	padding: 1px;
+	zoom: 1;
+}
+
+textarea {
+	background-color: #FFF;
+	border-style: inset;
+	border-width: 2px;
+	font-family: monospace;
+	font-size: 10pt;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	padding: 1px;
+	white-space: pre;
+	zoom: 1;
+}
+
+tfoot {
+	border-color: #D4D0C8;
+	display: block;
+}
+
+th {
+	border-color: #D4D0C8;
+	display: block;
+	font-weight: bold;
+	padding: 1px;
+	text-align: center;
+	zoom: 1;
+}
+
+thead {
+	border-color: #D4D0C8;
+	display: block;
+}
+
+tr {
+	border-color: #D4D0C8;
+	display: block;
+	zoom: 1;
+}
+
+ul {
+	display: block;
+	list-style-image: none;
+	list-style-position: outside;
+	list-style-type: disc;
+	margin: 14pt 0 14pt 30pt;
+}
+
+var {
+	font-style: italic;
+}
+
+
+		p {margin: 0;}
+
+		#Panel {
+			scrollbar-gutter: stable;
+		}
+
+		body {
+			user-select: none;
+		}
+		
+
+		body		{font: 8pt/10pt 'verdana', sans-serif; margin: 0}
+		#FileList	{position: absolute; left: 30%; width: 70%; height: 100%}
+		#Media		{margin-left: 15px}
+		#Panel		{position: absolute; width: 30%; height: 100%; overflow: auto}
+		#PieChart	{width: 100px; height: 50px; margin-top: 10px}
+		#Thumbnail	{width: 160px; height: 160px; margin-top: 0px}
+		#Status		{margin-left: 15px}
+		#Brand		{position: absolute; left: 30%; width: 70%; height: 100%; overflow: auto}
+		p		{margin-left: 15px; margin-top: 15px; margin-right: 15px}
+		p.Title		{font-size: 16pt; line-height: 1; font-weight: bold; margin-top: 5px}
+		p.LogoLine	{margin-left: 0; margin-top: -5px; margin-right: 0; margin-bottom: 20px}
+		p.Warning	{font-weight: bold; color: red}
+		p.Links		{margin-top: 5px}
+		a.Command	{font-weight: bold}
+		div.Release     {width: 160px; text-align: right; background: buttonface; 0px 8px, 4px, 8px}
+	
+
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+}
+.start-menu {
+	position: absolute !important; /* XXX overriding relative; could instead of using :after use border-image */
+	left: 2px;
+	bottom: 25px;
+	width: calc(186px + 21px); /* 186px isn't the proper width measured out, just what I had it before, (for the content, on chrome on windows 10; text wrapping is not cross-platform-consistent) */
+	height: 340px;
+	max-height: calc(100vh - 26px); /* based on taskbar height TODO: do this differently, probably in JS, since the taskbar will be resizable (or could be) */
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+}
+.start-menu-titlebar {
+	flex: 0 0 auto;
+	width: 21px;
+}	
+.start-menu-content {
+	overflow: auto;
+	padding: 15px;
+}
+.start-menu ul {
+	list-style: none;
+	margin: 1em 0;
+	padding: 0;
+}
+.desktop {
+	height: 100%;
+	display: flex;
+}
+.folder-view {
+	position: relative;
+	flex: 1;
+	overflow: auto;
+}
+.desktop .folder-view {
+	overflow: hidden;
+}
+.taskbar {
+	position: absolute;
+	z-index: 2;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 27px; /* not including outline part of border */
+	display: flex;
+	flex: 1;
+}
+/* .taskbar-button is generally .task or .start-button for now */
+.taskbar button,
+.taskbar-divider,
+.tray {
+	margin: 2px;
+}
+.taskbar-divider {
+	margin-right: 0px;
+	margin-left: 0px;
+	/* TODO: maybe make that 2px rule padding on the taskbar instead and avoid resetting this */
+}
+.taskbar button {
+	line-height: 14px;
+	padding: 2px;
+	overflow: hidden; /* TODO: If tons and tons of tasks don't show icons? (smaller than width of an icon?) */
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	/* (justify-content: flex-start;) */
+}
+.taskbar button .title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.taskbar .start-button {
+	flex-shrink: 0;
+	padding: 2px 4px;
+}
+.tray {
+	display: flex;
+	flex-direction: row;
+	/* align-items: center; */
+	/* align-content: center; */
+	/* justify-content: center; */
+	line-height: 22px;
+	box-sizing: border-box;
+	vertical-align: middle;
+}
+.tray-icons {
+	display: flex;
+	align-items: center;
+	margin-left: 2px; /* XXX basically 1px, but 2px because of the way the border is done */
+}
+.tray-icon {
+	margin-left: 1px;
+}
+.taskbar-time {
+	width: 60px;
+	text-align: center;
+}
+/* TODO: offset task button contents down a px when depressed... actually most buttons */
+.tasks {
+	display: flex;
+	flex: 1;
+	height: 100%;
+	min-width: 0; /* reset implicit min-width from flexbox */
+}
+.task {
+	max-width: 200px;
+	width: 50%;
+	text-align: left;
+}
+.task img {
+	padding-right: 4px;
+	flex: 0 0 auto;
+}
+.desktop,
+.folder-view,
+.taskbar,
+.start-button,
+.tasks,
+.task,
+.os-window,
+.window-titlebar,
+.window-title {
+	cursor: default;
+	user-select: none;
+	-o-user-select: none;
+	-ms-user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+.os-window {
+	display: flex;
+	flex-direction: column;
+}
+.window-titlebar .icon {
+	vertical-align: bottom;
+}
+.window-content {
+	margin: 0;
+	padding: 0;
+	flex: 1;
+}
+.desktop-icon {
+	display: inline-block;
+	vertical-align: bottom; /* with inline-block, always */
+	text-align: center;
+}
+.desktop-icon .icon-wrapper {
+	display: inline-block;
+	vertical-align: bottom; /* with inline-block, always */
+	position: relative;
+}
+.desktop-icon .icon-wrapper,
+.desktop-icon .icon-wrapper .selection-effect {
+	width: var(--icon-size, 32px);
+	height: var(--icon-size, 32px);
+}
+.desktop-icon .title {
+	line-height: 13px;
+	font-size: 9px;
+	overflow: hidden;
+	text-overflow: ellipsis; /* TODO: make this work with multiline text! This is apparently a limitation of this CSS property and there are various crazy CSS hacks and JS libs to solve this. */
+	word-wrap: break-word; /* All browsers since IE 5.5+ */
+	overflow-wrap: break-word; /* Renamed property in CSS3 draft spec */
+}
+.desktop-icon:not(.focused) .title {
+	/* max-height: 2em would only work with line-height: 1 */
+	max-height: calc(13px * 2);
+}
+.desktop-icon.focused {
+	z-index: 1; /* for multi-line title display */
+}
+.desktop-icon .title input {
+	display: flex;
+	width: 100%;
+}
+/* Fix dragging things (like windows) over iframes */
+.drag iframe {
+	pointer-events: none;
+}
+
+.marquee {
+	pointer-events: none;
+}
+
+.window-content .button-group {
+	width: 85px;
+}
+.window-content .button-group > button {
+	width: 95%;
+	padding: 3px 5px;
+}
+
+.help-window .window-content {
+	display: flex;
+	flex-flow: column;
+}
+.help-window .main {
+	flex: 1;
+	display: flex;
+	flex-flow: row;
+}
+.help-window .toolbar button {
+	width: 55px;
+	height: 40px;
+	padding: 0;
+}
+.help-window .toolbar button span {
+	display: inline-flex;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	/* flex centering + preventing overflow wrap means the font can be too big and it'll still stay centered */
+	font-size: 12px;
+	white-space: pre;
+	justify-content: center;
+}
+.help-window .toolbar button {
+	position: relative;
+}
+.help-window .toolbar button .icon {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.help-window .toolbar button .icon {
+	background-image: url("images/help-viewer-toolbar-icons-grayscale.png");
+}
+.help-window .toolbar button:not([disabled]):hover .icon {
+	background-image: url("images/help-viewer-toolbar-icons.png");
+}
+.help-window .toolbar button[disabled] .icon {
+	filter: saturate(0%) opacity(50%); /* fallback */
+	filter: url("#disabled-inset-filter");
+}
+.help-window .contents {
+	background: white;
+	background: var(--Window);
+	color: var(--WindowText);
+	flex-basis: 300px; /* normally the default is 200px, but that leaves a scrollbar and we don't have rollover viewing of longer titles (@TODO) */
+	flex-grow: 0;
+	flex-shrink: 0;
+	overflow: auto;
+}
+.help-window ul {
+	margin: 0;
+	padding: 0;
+}
+.help-window li {
+	display: block;
+	white-space: nowrap;
+}
+.help-window .item {
+	display: inline-block;
+}
+.help-window .folder:not(.expanded) ul {
+	display: none;
+}
+.help-window iframe {
+	flex: 1;
+	width: 0;
+}
+.help-window li ul {
+	padding-left: 16px;
+}
+.help-window li:before {
+	content: "";
+	display: inline-block;
+	vertical-align: middle;
+	width: 16px;
+	height: 16px;
+	background-position: 0 0;
+	margin-right: 2px;
+}
+.help-window .folder.expanded:before {
+	background-position: -16px 0;
+}
+.help-window .page:before {
+	background-position: -32px 0;
+}
+
+::before, ::after {
+	pointer-events: none;
+}
+
+.cursor-bully * {
+	cursor: inherit !important;
+}
+.loading-program * {
+	cursor: progress;
+}
+
+#webamp-context-menu {
+	z-index: 5000000 !important;
+}
+
+
+.desktop {
+	background: var(--Background);
+}
+.taskbar {
+	outline: 1px solid var(--ButtonLight);
+	border-top: 1px solid var(--ButtonHilight);
+	background: var(--ButtonFace);
+	color: var(--ButtonText);
+}
+.taskbar-divider {
+	border-left: 1px solid var(--ButtonShadow);
+	border-right: 1px solid var(--ButtonHilight);
+}
+.taskbar-time {
+	font-family: sans-serif;
+	font-family: "MS Sans Serif", "Segoe UI", sans-serif;
+	font-size: 12px;
+}
+.start-menu-titlebar {
+	/* background-image: url("images/start-menu-side.png"); */
+	/* background-image: url("images/start-menu-side-98-js.png"); */
+	background-image: url("images/start-menu-side-98-js-alt.png");
+	background-repeat: no-repeat;
+	background-position: bottom left;
+	background-color: #000080;
+}
+.start-menu li a,
+.start-menu .back-link {
+	display: block;
+	padding: 5px 0;
+	color: blue !important; /* regardless of :visited */
+}
+.start-menu li a:before,
+.start-menu .back-link:before,
+.the-thing-heading:before {
+	content: "»";
+	text-decoration: none;
+	display: inline-block;
+	margin-right: 5px;
+}
+.start-menu .back-link:before {
+	content: "«"
+}
+.the-thing-heading {
+	/* font-size: 1em; */
+}
+.windows-cant-do-it-you-can {
+	margin-top: 2em;
+	/* background: white;
+	padding: 5px;
+	border: inset 1px; */
+}
+.task.selected {
+	font-weight: bold;
+}
+.desktop-icon {
+	position: absolute;
+	outline: none;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+.folder-view:focus {
+	outline: none;
+}
+.folder-view:not([data-view-mode="DESKTOP"]):not([data-view-mode="LARGE_ICONS"]) .desktop-icon {
+	display: flex;
+	flex-direction: row;
+	width: 150px;
+	height: 17px;
+    align-items: center;
+}
+
+.folder-view[data-view-mode="DESKTOP"] .desktop-icon,
+.folder-view[data-view-mode="LARGE_ICONS"] .desktop-icon {
+	width: 75px;
+	height: 75px;
+}
+.desktop-icon .title {
+	font-family: sans-serif;
+	font-family: "MS Sans Serif", "Segoe UI", sans-serif;
+	/*font-size: 10px;*/
+	font-size: 8pt;
+	background: var(--Background);
+	color: white;
+	position: relative;
+	box-sizing: border-box;
+	display: flex;
+    justify-content: center;
+}
+.folder-view[data-view-mode="DESKTOP"] .desktop-icon .title,
+.folder-view[data-view-mode="LARGE_ICONS"] .desktop-icon .title {
+	margin-top: 5px;
+}
+.folder-view:not([data-view-mode="DESKTOP"]):not([data-view-mode="LARGE_ICONS"]) .desktop-icon .title {
+	text-align: start;
+    justify-content: start;
+	white-space: nowrap;
+	height: 17px;
+	line-height: 17px;
+	padding-right: 2px;
+	padding-left: 3px;
+}
+
+.folder-view:focus-within .desktop-icon.selected:not(.renaming) .title {
+	background: var(--Hilight);
+	color: var(--HilightText);
+}
+.folder-view:focus-within .desktop-icon.focused:not(.renaming) .title::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	border: 1px dotted #ffffff;
+	mix-blend-mode: exclusion;
+}
+.folder-view .desktop-icon.renaming .title {
+	border: 1px solid var(--ButtonText); /* @TODO: is this the right theme color? */
+}
+.desktop-icon .title input {
+	font: inherit;
+	outline: none;
+	border: none; /* using border of the .title */
+	height: 17px; /* @TODO: auto-size */
+	line-height: 13px; /* 17px-4px so the selection highlight doesn't abut the border (height is also important) */
+	box-sizing: border-box;
+	background: var(--Window);
+	color: var(--WindowText);
+	text-align: inherit;
+	padding: 0;
+	align-self: center;
+}
+.desktop-icon .icon-wrapper .selection-effect {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	mask-image: var(--icon-image);
+	-webkit-mask-image: var(--icon-image);
+	background: var(--Hilight);
+	opacity: 0.5;
+}
+.folder-view:focus-within .desktop-icon.selected .icon-wrapper .selection-effect {
+	display: block;
+}
+.desktop-icon .icon-wrapper {
+	position: relative;
+}
+.desktop-icon.shortcut .icon-wrapper:after {
+	content: var(--shortcut-icon, url("images/icons/shortcut-32x32.png"));
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.folder-view .marquee {
+	border: 1px dotted #ffffff;
+	box-sizing: border-box;
+	mix-blend-mode: exclusion;
+	/* TODO: fallback for browsers that don't support mix-blend-mode (something like #FF7F7F)... Edge doesn't support @supports either :/ */
+	z-index: 1;
+}
+
+.help-window .item {
+	font-family: 'Segoe UI', sans-serif;
+	font-size: 12px;
+	padding: 0 2px;
+	position: relative; /* for ::after */
+}
+.help-window .item:hover {
+	text-decoration: underline;
+	color: #0000FF;
+	cursor: pointer;
+}
+.help-window li:before {
+	background-image: url("../../images/help-icons.png");
+}
+.help-window:not(.focused) .item.selected {
+	background-color: var(--ButtonFace);
+	color: var(--ButtonText); /* ?? */
+}
+.help-window.focused .item.selected {
+	background-color: var(--Hilight);
+	color: var(--HilightText);
+	/* @TODO: separate focus state of the item */
+	outline: 1px dotted black;
+	outline-offset: -1px;
+}
+/* @TODO: separate focus state of the item; while mouse down, the main highlight does not move with the arrow keys but this does, among other differences */
+/* .help-window.focused .item.selected::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	border: 1px dotted white;
+	mix-blend-mode: difference;
+} */
+
+.window-switcher {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 350px;
+	z-index: 1000;
+	user-select: none;
+}
+.window-switcher * {
+	pointer-events: none;
+}
+.window-switcher-list {
+	display: flex;
+    margin: 0;
+    padding: 0;
+	flex-direction: row;
+	flex-wrap: wrap;
+    justify-content: start;
+	max-width: calc(43px * 7);
+	margin-top: 17px;
+	margin-bottom: 10px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.window-switcher-item {
+	display: flex;
+	width: 43px;
+	height: 43px;
+	box-sizing: border-box;
+	border: 2px solid transparent;
+	padding: 0;
+	outline: none;
+}
+.window-switcher-item.active {
+	border: 2px solid var(--Hilight);
+}
+.window-switcher-item img {
+	margin: 3px;
+}
+.window-switcher-window-name {
+    align-self: stretch;
+	font-family: "MS Sans Serif", "Segoe UI", sans-serif;
+	font-size: 10pt; /* not sure about the font-size/line-height */
+	line-height: 16px;
+	font-weight: bold;
+	height: 24px; /* should be 25px, but the border is getting screwed up if this isn't an even number */
+	box-sizing: border-box;
+	padding: 2px;
+	margin: 8px 12px;
+	margin-top: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+* {
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.menu-hotkey {
+	/* TODO: remove once this is in os-gui */
+	text-decoration-skip: none;
+    text-decoration-skip-ink: none;
+}
+
+.menus,
+.menu-popup,
+.os-window,
+.os-window .window-titlebar,
+.os-window .window-title {
+	cursor: default;
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	    -ms-user-select: none;
+	        user-select: none;
+}
+
+.os-window {
+	contain: layout; /* contain: paint; seems to clip children to the padding-box, including for interaction, not just painting; it breaks being able to grab resize handles over the border */
+	/* overflow: hidden; is also not usable for the same reason */
+	/* I might be able to do either with overflow-clip-margin however (@TODO) */
+	display: flex;
+	flex-direction: column;
+	/* will-change: width height left top; */
+}
+.window-content {
+	flex: 1;
+	min-height: 0px;
+	/* Text overflowing the window frame is really ugly!
+	overflow: hidden; would make it harder to enable scrollbars (overflow: auto !important)
+	We want to allow scrollbars to be enabled easily (but not enable them),
+	and we want to clip to the border of the window, without contents overlapping the border at all. */
+	/* @FIXME: this breaks menu bar popup menus! (they get cut off, except for second level ones which are not descendents of the window; another reason to reimplement the menus!) */
+    contain: layout paint;
+}
+
+.os-window .window-titlebar,
+body > .window-titlebar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	white-space: nowrap;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+.os-window .window-title-area {
+	position: relative;
+	flex: 1;
+}
+
+.os-window .window-titlebar .icon {
+	vertical-align: bottom;
+}
+
+.os-window.maximized .handle,
+.os-window.minimized-without-taskbar .handle {
+	display: none; /* prevent resizing when window is minimized */
+}
+
+/* Fix dragging things (like windows) over iframes */
+.dragging iframe {
+	pointer-events: none;
+}
+
+.menus {
+	display: flex;
+	flex: 0 0 auto;
+}
+.menu-popup {
+	position: absolute;
+	box-sizing: border-box;
+}
+.menu-popup-table {
+	border-collapse: collapse;
+}
+.menu-item {
+	white-space: nowrap;
+}
+.menu-hr {
+	display: block !important;
+	height: 0;
+	width: auto;
+}
+.menu-hotkey {
+	display: inline !important;
+}
+.menu-item-checkbox-area,
+.menu-item-submenu-area {
+	min-width: 16px;
+}
+.menu-item-checkbox-area,
+.menu-item-submenu-area {
+	text-align: center;
+}
+
+/* .window-content .button-group {
+	width: 85px;
+}
+.window-content .button-group > button {
+	width: 95%;
+	padding: 3px 5px;
+} */
+
+::before,
+::after {
+	pointer-events: none;
+}
+
+/*# sourceMappingURL=layout.css.map */
+:root {
+	/* These resources are generated. */
+	/* JS: makeThemeCSSFile(renderThemeGraphics(getComputedStyle(document.documentElement))) */
+	--checker: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVQYV2P8/////4MHDzIwHjhw4L+9vT0DAHAFCj6esq3FAAAAAElFTkSuQmCC");
+	--button-active-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h192v192h-192v-192z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	--button-normal-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	--inset-deep-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	--button-default-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h96v32h-64v64h-32v-96z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M160%2064h32v128h-128v-32h96v-96z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M96%2096h64v64h-64v-64z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%09%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22256%22%20height%3D%22256%22%20stroke-width%3D%2264%22%20stroke%3D%22%20rgb(0%2C%200%2C%200)%22%20fill%3D%22none%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 96 / 3px;
+	--button-default-active-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h192v192h-192v-192z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%09%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22256%22%20height%3D%22256%22%20stroke-width%3D%2264%22%20stroke%3D%22%20rgb(0%2C%200%2C%200)%22%20fill%3D%22none%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	--scrollbar-arrows-ButtonText: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAW0lEQVQ4T2NkGGSAcZC5h4FWDvrPwEC02ShqkR0EkkAHuBxMyEKYWYQ8jKEOXQOyo/A5BuZwqqvBZiA+3xMbilQLIWqlcUJRimwPzjRELcdQZA6hREeR4eRoBgBoXhAK6oiMhwAAAABJRU5ErkJggg==");
+	--scrollbar-arrows-GrayText: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDmpoaPjf0NBAlNnoauGaQBLooYXLUEIWwswi5Chs6lB8gewofI6BOZwWajCCFZ/viQ1FqoUQtRI4oShFtgdnGqKWYyg1h6icQKklpOgHAM9mQArEvm5+AAAAAElFTkSuQmCC");
+	--scrollbar-arrows-ButtonHilight: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDvr///9/RkZGosxGVwvXBJJADy1chhKyEGYWIUdhU4fiC2RH4XMMzOG0UIMRrPh8T2woUi2EqJXACUUpsj040xC1HEOpOUTlBEotIUU/AKXFQAqyTJ6DAAAAAElFTkSuQmCC");
+	--scrollbar-size: 13px;
+	--scrollbar-button-inner-size: 9px;
+
+	/* Colors */
+	--ActiveBorder: rgb(192, 192, 192);
+	--ActiveTitle: rgb(0, 0, 128);
+	--AppWorkspace: rgb(128, 128, 128);
+	--Background: rgb(0, 128, 128);
+	--ButtonAlternateFace: rgb(180, 180, 180);
+	--ButtonDkShadow: rgb(0, 0, 0);
+	--ButtonFace: rgb(192, 192, 192);
+	--ButtonHilight: rgb(255, 255, 255);
+	--ButtonLight: rgb(223, 223, 223);
+	--ButtonShadow: rgb(128, 128, 128);
+	--ButtonText: rgb(0, 0, 0);
+	--GradientActiveTitle: rgb(16, 132, 208);
+	--GradientInactiveTitle: rgb(181, 181, 181);
+	--GrayText: rgb(128, 128, 128);
+	--Hilight: rgb(0, 0, 128);
+	--HilightText: rgb(255, 255, 255);
+	--HotTrackingColor: rgb(0, 0, 255);
+	--InactiveBorder: rgb(192, 192, 192);
+	--InactiveTitle: rgb(128, 128, 128);
+	--InactiveTitleText: rgb(192, 192, 192);
+	--InfoText: rgb(0, 0, 0);
+	--InfoWindow: rgb(255, 255, 225);
+	--Menu: rgb(192, 192, 192);
+	--MenuText: rgb(0, 0, 0);
+	--Scrollbar: rgb(192, 192, 192);
+	--TitleText: rgb(255, 255, 255);
+	--Window: rgb(255, 255, 255);
+	--WindowFrame: rgb(0, 0, 0);
+	--WindowText: rgb(0, 0, 0);
+}
+
+.inset-deep {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(128, 128, 128) rgb(255, 255, 255) rgb(255, 255, 255) rgb(128, 128, 128);
+	border-color: var(--ButtonShadow) var(--ButtonHilight) var(--ButtonHilight) var(--ButtonShadow);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+	/* as fallback */
+	position: relative;
+	/* for pseudo element(s) */
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--inset-deep-border-image);
+	   border-image: var(--inset-deep-border-image);
+	border-color: rgb(128, 128, 128);
+	border-color: var(--ButtonShadow);
+	border-style: solid;
+	border-width: 2px 2px;
+}
+.outset-deep {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(255, 255, 255) rgb(128, 128, 128) rgb(128, 128, 128) rgb(255, 255, 255);
+	border-color: var(--ButtonHilight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonHilight);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+	/* as fallback */
+	position: relative;
+	/* for pseudo element(s) */
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--button-normal-border-image);
+	   border-image: var(--button-normal-border-image);
+	border-color: rgb(223, 223, 223) rgb(128, 128, 128) rgb(128, 128, 128) rgb(223, 223, 223);
+	border-color: var(--ButtonLight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonLight);
+	border-style: solid;
+	border-width: 2px 2px;
+}
+.inset-shallow {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(128, 128, 128) rgb(255, 255, 255) rgb(255, 255, 255) rgb(128, 128, 128);
+	border-color: var(--ButtonShadow) var(--ButtonHilight) var(--ButtonHilight) var(--ButtonShadow);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+}
+.outset-shallow {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(255, 255, 255) rgb(128, 128, 128) rgb(128, 128, 128) rgb(255, 255, 255);
+	border-color: var(--ButtonHilight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonHilight);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+}
+
+button {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+}
+button:not(.lightweight) {
+	outline: none; /* replaced with inner dotted focus ring (which is admittedly not so prominent...) */ border-style: solid; border-width: 1px; border-color: rgb(255, 255, 255) rgb(128, 128, 128) rgb(128, 128, 128) rgb(255, 255, 255); border-color: var(--ButtonHilight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonHilight); background-color: rgb(192, 192, 192); background-color: var(--ButtonFace); color: rgb(0, 0, 0); color: var(--ButtonText); /* as fallback */ position: relative; /* for pseudo element(s) */ -o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px; border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px; -o-border-image: var(--button-normal-border-image); border-image: var(--button-normal-border-image); border-color: rgb(223, 223, 223) rgb(128, 128, 128) rgb(128, 128, 128) rgb(223, 223, 223); border-color: var(--ButtonLight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonLight); border-style: solid; border-width: 2px 2px; border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px; border-image: var(--button-normal-border-image);
+}
+button:not(.lightweight).default {
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h96v32h-64v64h-32v-96z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M160%2064h32v128h-128v-32h96v-96z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M96%2096h64v64h-64v-64z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%09%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22256%22%20height%3D%22256%22%20stroke-width%3D%2264%22%20stroke%3D%22%20rgb(0%2C%200%2C%200)%22%20fill%3D%22none%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 96 / 3px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h96v32h-64v64h-32v-96z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M160%2064h32v128h-128v-32h96v-96z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M96%2096h64v64h-64v-64z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%09%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22256%22%20height%3D%22256%22%20stroke-width%3D%2264%22%20stroke%3D%22%20rgb(0%2C%200%2C%200)%22%20fill%3D%22none%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 96 / 3px;
+	-o-border-image: var(--button-default-border-image);
+	   border-image: var(--button-default-border-image);
+}
+button:not(.lightweight):enabled:hover:active {
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h192v192h-192v-192z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h192v192h-192v-192z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--button-active-border-image);
+	   border-image: var(--button-active-border-image);
+}
+button:not(.lightweight).default:enabled:hover:active {
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h192v192h-192v-192z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%09%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22256%22%20height%3D%22256%22%20stroke-width%3D%2264%22%20stroke%3D%22%20rgb(0%2C%200%2C%200)%22%20fill%3D%22none%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h256v256h-256v-256z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h192v192h-192v-192z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%09%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22256%22%20height%3D%22256%22%20stroke-width%3D%2264%22%20stroke%3D%22%20rgb(0%2C%200%2C%200)%22%20fill%3D%22none%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--button-default-active-border-image);
+	   border-image: var(--button-default-active-border-image);
+}
+
+/* TODO: offset content on press! */
+/* (this would need a child ELEMENT, wouldn't work with text nodes as direct descendants:) */
+/*button:active > * {
+	position: relative;
+	left: 1px;
+	top: 1px;
+}
+*/
+/* also, this is more complicated; see Paint; the tool buttons translate when being pushed and when depressed, and these add together */
+/* omg, a thought... what if I used feDisplacementMap SVG filter... */
+
+button:not(.lightweight):focus::before {
+	content: "";
+	display: block;
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	right: 2px;
+	bottom: 2px;
+	border: 1px dotted rgb(0, 0, 0);
+	border: 1px dotted var(--ButtonDkShadow); /* ?? */
+	/* TODO: get exact inset dimensions, and have corners without dots ideally */
+	/* (could use outline instead of ::before at this point) */
+}
+button.lightweight {
+	outline: none; /* these buttons are not usually keyboard accessible, or the focus it shown just by inset (menu buttons) */
+
+	border-style: solid;
+	border-width: 1px;
+	border-color: transparent;
+}
+/* TODO: recommend preventing focus on click for lightweight buttons */
+button.lightweight:enabled:hover {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(255, 255, 255) rgb(128, 128, 128) rgb(128, 128, 128) rgb(255, 255, 255);
+	border-color: var(--ButtonHilight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonHilight);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+}
+button.lightweight:enabled:hover:active, button.lightweight.pressing, button.lightweight.pressed {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(128, 128, 128) rgb(255, 255, 255) rgb(255, 255, 255) rgb(128, 128, 128);
+	border-color: var(--ButtonShadow) var(--ButtonHilight) var(--ButtonHilight) var(--ButtonShadow);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+}
+button:disabled {
+	color: rgb(128, 128, 128);
+	color: var(--GrayText);
+	text-shadow: 1px 1px 0px rgb(255, 255, 255);
+	text-shadow: 1px 1px 0px var(--ButtonHilight);
+}
+button:not(.lightweight).toggle:enabled:hover:active, button:not(.lightweight).pressing {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(128, 128, 128) rgb(255, 255, 255) rgb(255, 255, 255) rgb(128, 128, 128);
+	border-color: var(--ButtonShadow) var(--ButtonHilight) var(--ButtonHilight) var(--ButtonShadow);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+	/* as fallback */
+	position: relative;
+	/* for pseudo element(s) */
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--inset-deep-border-image);
+	   border-image: var(--inset-deep-border-image);
+}
+button:not(.lightweight).toggle:enabled:hover:active, button:not(.lightweight).pressing {
+	border-color: rgb(128, 128, 128);
+	border-color: var(--ButtonShadow);
+	border-style: solid;
+	border-width: 2px 2px;
+}
+button:not(.lightweight).toggle.selected, button:not(.lightweight).pressed {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(128, 128, 128) rgb(255, 255, 255) rgb(255, 255, 255) rgb(128, 128, 128);
+	border-color: var(--ButtonShadow) var(--ButtonHilight) var(--ButtonHilight) var(--ButtonShadow);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+	/* as fallback */
+	position: relative;
+	/* for pseudo element(s) */
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--inset-deep-border-image);
+	   border-image: var(--inset-deep-border-image);
+}
+button:not(.lightweight).toggle.selected, button:not(.lightweight).pressed {
+	border-color: rgb(128, 128, 128);
+	border-color: var(--ButtonShadow);
+	border-style: solid;
+	border-width: 2px 2px;
+}
+button:not(.lightweight).toggle.selected, button:not(.lightweight).pressed {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVQYV2P8/////4MHDzIwHjhw4L+9vT0DAHAFCj6esq3FAAAAAElFTkSuQmCC") repeat;
+	background: var(--checker) repeat;
+	-ms-interpolation-mode: nearest-neighbor;
+	    image-rendering: -moz-crisp-edges;
+	    image-rendering: pixelated;
+}
+
+.os-window .window-titlebar,
+body > .window-titlebar {
+	background: rgb(0, 0, 128);
+	background: var(--ActiveTitle);
+	background: linear-gradient(to right, rgb(0, 0, 128) 0%, rgb(16, 132, 208) 100%);
+	background: linear-gradient(to right, var(--ActiveTitle) 0%, var(--GradientActiveTitle) 100%);
+	
+	color: rgb(255, 255, 255);
+	
+	color: var(--TitleText);
+}
+
+.os-window .window-titlebar, body > .window-titlebar {
+	font-family: 'Segoe UI', sans-serif;
+	font-size: 12px;
+}
+.os-window.rtl .window-titlebar {
+	background: linear-gradient(to left, rgb(0, 0, 128) 0%, rgb(16, 132, 208) 100%);
+	background: linear-gradient(to left, var(--ActiveTitle) 0%, var(--GradientActiveTitle) 100%);
+}
+.os-window:not(.tool-window) .window-titlebar,
+body > .window-titlebar {
+	font-weight: bold;
+}
+.os-window:not(.focused) .window-titlebar {
+	background: darkgray;
+	background: linear-gradient(to right, rgb(128, 128, 128) 0%, rgb(181, 181, 181) 100%);
+	background: linear-gradient(to right, var(--InactiveTitle) 0%, var(--GradientInactiveTitle) 100%);
+
+	color: rgb(192, 192, 192);
+
+	color: var(--InactiveTitleText);
+}
+.os-window.rtl:not(.focused) .window-titlebar {
+	background: linear-gradient(to left, rgb(128, 128, 128) 0%, rgb(181, 181, 181) 100%);
+	background: linear-gradient(to left, var(--InactiveTitle) 0%, var(--GradientInactiveTitle) 100%);
+}
+.os-window {
+	/* Needed for when maximized, otherwise would be provided by %outset-deep */
+	background: rgb(192, 192, 192);
+	background: var(--ButtonFace);
+
+	/* background: var(--Window); */
+	/*color: var(--WindowText);*/
+	/*border: 1px solid var(--WindowFrame);*/
+	/* TODO: use window-specific theme colors; also different types of windows */
+}
+.os-window:not(.maximized) {
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(255, 255, 255) rgb(128, 128, 128) rgb(128, 128, 128) rgb(255, 255, 255);
+	border-color: var(--ButtonHilight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonHilight);
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	color: rgb(0, 0, 0);
+	color: var(--ButtonText);
+	/* as fallback */
+	position: relative;
+	/* for pseudo element(s) */
+	-o-border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	   border-image: url("data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22256px%22%20height%3D%22256px%22%20viewBox%3D%220%200%20256%20256%22%3E%0A%09%09%09%0A%09%09%3Cpath%20d%3D%22M0%200h224v32h-192v192h-32v-224z%22%20fill%3D%22%20rgb(255%2C%20255%2C%20255)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M224%200h32v256h-256v-32h224v-224z%22%20fill%3D%22%20rgb(0%2C%200%2C%200)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M32%2032h160v32h-128v128h-32v-160z%22%20fill%3D%22%20rgb(223%2C%20223%2C%20223)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M192%2032h32v192h-192v-32h160v-160z%22%20fill%3D%22%20rgb(128%2C%20128%2C%20128)%22%2F%3E%0A%09%09%3Cpath%20d%3D%22M64%2064h128v128h-128v-128z%22%20fill%3D%22%20rgb(192%2C%20192%2C%20192)%22%2F%3E%0A%09%0A%09%09%3C%2Fsvg%3E") 64 / 2px;
+	-o-border-image: var(--button-normal-border-image);
+	   border-image: var(--button-normal-border-image);
+	border-color: rgb(223, 223, 223) rgb(128, 128, 128) rgb(128, 128, 128) rgb(223, 223, 223);
+	border-color: var(--ButtonLight) var(--ButtonShadow) var(--ButtonShadow) var(--ButtonLight);
+	border-style: solid;
+	border-width: 2px 2px;
+	padding: 2px;
+}
+
+.window-button {
+	display: block;
+	width: 16px;
+	height: 14px;
+	padding: 0;
+	margin: 2px 0;
+}
+.window-button-icon {
+	display: block;
+	/* background-image: url("images/titlebar-buttons.png"); */
+	--sprite-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAKCAYAAADo3z3CAAAAoUlEQVRIS9VVWw7AIAib9z/0FpZgCOFRgpluf9MClhYdV++7gfDhYLxYDw+UyiHd5F8S5lr6zNa6Xpv/KwhHOahQpLB1+CwfycgYrwmE0WK8MTsIR1aOGsR+NYkkYzN5/pGwVA9xA/diq8LeHCKuQxQ+aoYt2yJWtpSNZth0edRpGVC5eGQcSg4hXLml3fdpBeHs8evWyPKX9ruXVqnYCeAHA8IyC9K2kmkAAAAASUVORK5CYII=");
+	--sprite-y: 0;
+	-ms-interpolation-mode: nearest-neighbor;
+	    image-rendering: -moz-crisp-edges;
+	    image-rendering: pixelated;
+	width: 12px;
+	height: 10px;
+	position: relative;
+	pointer-events: none;
+}
+.os-window .window-button:enabled:hover:active .window-button-icon,
+.os-window .window-button.pressing .window-button-icon {
+	top: 1px;
+	left: 1px;
+}
+.window-button:disabled .window-button-icon {
+	/* filter: saturate(0%) opacity(50%); fallback */
+	/* filter: url("#os-gui-black-to-inset-filter"); */
+}
+.window-button .window-button-icon::before,
+.window-button .window-button-icon::after {
+	content: "";
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	-webkit-mask-image: var(--sprite-image);
+	        mask-image: var(--sprite-image);
+	-webkit-mask-position: var(--sprite-x) var(--sprite-y);
+	        mask-position: var(--sprite-x) var(--sprite-y);
+	background-color: rgb(0, 0, 0);
+	background-color: var(--ButtonText);
+}
+.window-button:disabled .window-button-icon::before {
+	background-color: rgb(255, 255, 255);
+	background-color: var(--ButtonHilight);
+	left: 1px;
+	top: 1px;
+}
+.window-button:enabled .window-button-icon::after {
+	display: none;
+}
+.window-button:disabled .window-button-icon::after {
+	background-color: rgb(128, 128, 128);
+	background-color: var(--GrayText);
+}
+.window-action-close .window-button-icon  {
+	--sprite-x: calc(-3 * 13px - 1px);
+}
+.window-action-maximize .window-button-icon  {
+	--sprite-x: calc(-1 * 13px - 1px);
+}
+.window-action-restore .window-button-icon  {
+	--sprite-x: calc(-2 * 13px - 1px);
+}
+.window-action-minimize .window-button-icon  {
+	--sprite-x: calc(-0 * 13px - 1px);
+}
+.window-close-button {
+	margin-left: 2px;
+	margin-right: 2px;
+}
+.os-window.tool-window .window-close-button {
+	width: 11px;
+	height: 11px;
+}
+.os-window.tool-window .window-close-button .window-button-icon {
+	width: 7px;
+	height: 7px;
+	--sprite-x: 7px;
+}
+.os-window .window-title-area {
+	height: 16px;
+}
+.os-window.tool-window .window-title-area {
+	height: 14px;
+}
+.os-window .window-titlebar {
+	height: 18px;
+}
+.os-window.tool-window .window-titlebar {
+	height: 15px;
+}
+.os-window .window-title {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: inline-block !important;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	padding-left: 2px;
+}
+
+.menus {
+	background: rgb(192, 192, 192);
+	background: var(--Menu);
+	color: rgb(0, 0, 0);
+	color: var(--MenuText);
+}
+.os-window:not(.focused) .menus {
+	color: rgb(128, 128, 128);
+	color: var(--GrayText);
+}
+.menus *, .menu-popup * {
+	font-family: 'Segoe UI', sans-serif;
+	font-size: 12px;
+}
+.menu-button {
+	box-sizing: border-box;
+	height: 18px;
+	line-height: 1;
+	margin-top: 1px;
+	margin-bottom: 1px;
+	padding: 2px 5px;
+	position: relative;
+	outline: 0;
+	/* @extend button.lightweight; */
+	background: rgb(192, 192, 192);
+	background: var(--Menu);
+}
+/* Note: In Windows 98, normal menu bars have an inset highlight if you use Esc and then the arrow keys,
+whereas Explorer's menu bars are outset and match the hover effect, which I feel makes more sense,
+so I think I'll immitate that. */
+/* Also, to prevent duplicate highlight, and lingering highlight with touch, I'm using a class, rather than :hover/:focus/:active */
+.menu-button.highlight {
+	box-shadow: 1px 1px 0 rgb(255, 255, 255) inset, -1px -1px 0 rgb(128, 128, 128) inset;
+	box-shadow: 1px 1px 0 var(--ButtonHilight) inset, -1px -1px 0 var(--ButtonShadow) inset;
+}
+.menu-button.highlight.active {
+	box-shadow: 1px 1px 0 rgb(128, 128, 128) inset, -1px -1px 0 rgb(255, 255, 255) inset;
+	box-shadow: 1px 1px 0 var(--ButtonShadow) inset, -1px -1px 0 var(--ButtonHilight) inset;
+	top: 1px;
+	left: 1px;
+}
+.menu-popup {
+	display: block;
+	padding: 2px;
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	border-top: 1px solid rgb(192, 192, 192);
+	border-top: 1px solid var(--ButtonFace);
+	border-left: 1px solid rgb(192, 192, 192);
+	border-left: 1px solid var(--ButtonFace);
+	border-right: 1px solid rgb(0, 0, 0);
+	border-right: 1px solid var(--ButtonDkShadow);
+	border-bottom: 1px solid rgb(0, 0, 0);
+	border-bottom: 1px solid var(--ButtonDkShadow);
+	box-shadow: 1px 1px 0 rgb(255, 255, 255) inset, -1px -1px 0 rgb(128, 128, 128) inset;
+	box-shadow: 1px 1px 0 var(--ButtonHilight) inset, -1px -1px 0 var(--ButtonShadow) inset;
+	background: rgb(192, 192, 192);
+	background: var(--Menu);
+	color: rgb(0, 0, 0);
+	color: var(--MenuText);
+}
+.menu-popup td {
+    padding: 0 1px;
+}
+.menu-item {
+	padding: 1px 3px;
+	margin: 2px;
+	height: 17px;
+}
+.menu-item[disabled] {
+	color: rgb(128, 128, 128);
+	color: var(--GrayText);
+	text-shadow: 0.8px 0.8px 0px rgb(255, 255, 255);
+	text-shadow: 0.8px 0.8px 0px var(--ButtonHilight);
+}
+.menu-item.highlight:not([disabled]),
+.menu-item.active:not([disabled]) {
+	color: rgb(255, 255, 255);
+	color: var(--HilightText);
+}
+.menu-item.highlight,
+.menu-item.active {
+	background: rgb(0, 0, 128);
+	background: var(--Hilight);
+	text-shadow: none;
+	outline: 0;
+}
+.menu-item .menu-item-shortcut {
+	padding-left: 10px;
+}
+.menu-hr {
+	border: 0;
+	border-top: 1px solid rgb(128, 128, 128);
+	border-top: 1px solid var(--ButtonShadow);
+	border-bottom: 1px solid rgb(255, 255, 255);
+	border-bottom: 1px solid var(--ButtonHilight);
+	margin: 0;
+	margin-top: 3px;
+	margin-bottom: 4px;
+}
+.menu-hotkey {
+	text-decoration: underline;
+}
+.menu-hotkey::-moz-selection {
+	/* prevent weird looking white underlines if menubar is contained in a selection, possible in the demo (minute edge case) */
+    text-decoration-color: rgb(0, 0, 0) !important;
+    text-decoration-color: var(--MenuText) !important;
+}
+.menu-hotkey::selection {
+	/* prevent weird looking white underlines if menubar is contained in a selection, possible in the demo (minute edge case) */
+    -webkit-text-decoration-color: rgb(0, 0, 0) !important;
+            text-decoration-color: rgb(0, 0, 0) !important;
+    -webkit-text-decoration-color: var(--MenuText) !important;
+            text-decoration-color: var(--MenuText) !important;
+}
+
+
+::-moz-selection {
+	background-color: rgb(0, 0, 128);
+	background-color: var(--Hilight);
+	color: rgb(255, 255, 255);
+	color: var(--HilightText);
+}
+
+
+::selection {
+	background-color: rgb(0, 0, 128);
+	background-color: var(--Hilight);
+	color: rgb(255, 255, 255);
+	color: var(--HilightText);
+}
+
+.scrollbar {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVQYV2P8/////4MHDzIwHjhw4L+9vT0DAHAFCj6esq3FAAAAAElFTkSuQmCC") repeat;
+	background: var(--checker) repeat;
+	-ms-interpolation-mode: nearest-neighbor;
+	    image-rendering: -moz-crisp-edges;
+	    image-rendering: pixelated;
+}
+.scrollbar-thumb {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	border-top: 1px solid rgb(192, 192, 192);
+	border-top: 1px solid var(--ButtonFace);
+	border-left: 1px solid rgb(192, 192, 192);
+	border-left: 1px solid var(--ButtonFace);
+	border-right: 1px solid rgb(0, 0, 0);
+	border-right: 1px solid var(--ButtonDkShadow);
+	border-bottom: 1px solid rgb(0, 0, 0);
+	border-bottom: 1px solid var(--ButtonDkShadow);
+	box-shadow: 1px 1px 0 rgb(255, 255, 255) inset, -1px -1px 0 rgb(128, 128, 128) inset;
+	box-shadow: 1px 1px 0 var(--ButtonHilight) inset, -1px -1px 0 var(--ButtonShadow) inset;
+}
+.scrollbar-track-piece:hover:active {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVQYV2P8/////4MHDzIwHjhw4L+9vT0DAHAFCj6esq3FAAAAAElFTkSuQmCC") repeat;
+	background: var(--checker) repeat;
+	-ms-interpolation-mode: nearest-neighbor;
+	    image-rendering: -moz-crisp-edges;
+	    image-rendering: pixelated;
+	background-color: white;
+	background-blend-mode: difference;
+	/* background-attachment: fixed; breaks the checkered background in chrome */
+}
+.scrollbar-track-piece.increment {
+	background-position: bottom;
+}
+.scrollbar-corner {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+}
+
+.scrollbar-button {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	border-top: 1px solid rgb(192, 192, 192);
+	border-top: 1px solid var(--ButtonFace);
+	border-left: 1px solid rgb(192, 192, 192);
+	border-left: 1px solid var(--ButtonFace);
+	border-right: 1px solid rgb(0, 0, 0);
+	border-right: 1px solid var(--ButtonDkShadow);
+	border-bottom: 1px solid rgb(0, 0, 0);
+	border-bottom: 1px solid var(--ButtonDkShadow);
+	box-shadow: 1px 1px 0 rgb(255, 255, 255) inset, -1px -1px 0 rgb(128, 128, 128) inset;
+	box-shadow: 1px 1px 0 var(--ButtonHilight) inset, -1px -1px 0 var(--ButtonShadow) inset;
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAW0lEQVQ4T2NkGGSAcZC5h4FWDvrPwEC02ShqkR0EkkAHuBxMyEKYWYQ8jKEOXQOyo/A5BuZwqqvBZiA+3xMbilQLIWqlcUJRimwPzjRELcdQZA6hREeR4eRoBgBoXhAK6oiMhwAAAABJRU5ErkJggg==");
+	background-image: var(--scrollbar-arrows-ButtonText);
+	-ms-interpolation-mode: nearest-neighbor;
+	    image-rendering: -moz-crisp-edges;
+	    image-rendering: pixelated;
+	width: 13px;
+	width: var(--scrollbar-size);
+	height: 13px;
+	height: var(--scrollbar-size);
+	box-sizing: border-box;
+}
+.scrollbar-button:not(.disabled):hover:active {
+	border: 1px solid rgb(128, 128, 128);
+	border: 1px solid var(--ButtonShadow);
+	box-shadow: none;
+}
+.scrollbar-button.disabled {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDmpoaPjf0NBAlNnoauGaQBLooYXLUEIWwswi5Chs6lB8gewofI6BOZwWajCCFZ/viQ1FqoUQtRI4oShFtgdnGqKWYyg1h6icQKklpOgHAM9mQArEvm5+AAAAAElFTkSuQmCC"), url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDvr///9/RkZGosxGVwvXBJJADy1chhKyEGYWIUdhU4fiC2RH4XMMzOG0UIMRrPh8T2woUi2EqJXACUUpsj040xC1HEOpOUTlBEotIUU/AKXFQAqyTJ6DAAAAAElFTkSuQmCC");
+	background-image: var(--scrollbar-arrows-GrayText), var(--scrollbar-arrows-ButtonHilight);
+}
+
+.scrollbar-button.horizontal.decrement.disabled {
+	background-position: /* left arrow */
+		calc(9px * -3 + 1px) 1px,
+		calc(9px * -3 + 2px) 2px;
+	background-position: /* left arrow */
+		calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -3 + 2px) 2px;
+}
+.scrollbar-button.horizontal.increment.disabled {
+	background-position: /* right arrow */
+		calc(9px * -2 + 1px) 1px,
+		calc(9px * -2 + 2px) 2px;
+	background-position: /* right arrow */
+		calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -2 + 2px) 2px;
+}
+.scrollbar-button.vertical.decrement.disabled {
+	background-position: /* up arrow */
+		calc(9px * -1 + 1px) 1px,
+		calc(9px * -1 + 2px) 2px;
+	background-position: /* up arrow */
+		calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -1 + 2px) 2px;
+}
+.scrollbar-button.vertical.increment.disabled {
+	background-position: /* down arrow */
+		calc(9px * -0 + 1px) 1px,
+		calc(9px * -0 + 2px) 2px;
+	background-position: /* down arrow */
+		calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -0 + 2px) 2px;
+}
+
+.scrollbar-button.horizontal.decrement {
+	background-position: calc(9px * -3 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px; /* left */
+}
+.scrollbar-button.horizontal.increment {
+	background-position: calc(9px * -2 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px; /* right */
+}
+.scrollbar-button.vertical.decrement {
+	background-position: calc(9px * -1 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px; /* up */
+}
+.scrollbar-button.vertical.increment {
+	background-position: calc(9px * -0 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px; /* down */
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-button {
+	width: 13px;
+	width: var(--scrollbar-size);
+	height: 13px;
+	height: var(--scrollbar-size);
+}
+
+::-webkit-scrollbar {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVQYV2P8/////4MHDzIwHjhw4L+9vT0DAHAFCj6esq3FAAAAAElFTkSuQmCC") repeat;
+	background: var(--checker) repeat;
+	image-rendering: pixelated;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	border-top: 1px solid rgb(192, 192, 192);
+	border-top: 1px solid var(--ButtonFace);
+	border-left: 1px solid rgb(192, 192, 192);
+	border-left: 1px solid var(--ButtonFace);
+	border-right: 1px solid rgb(0, 0, 0);
+	border-right: 1px solid var(--ButtonDkShadow);
+	border-bottom: 1px solid rgb(0, 0, 0);
+	border-bottom: 1px solid var(--ButtonDkShadow);
+	box-shadow: 1px 1px 0 rgb(255, 255, 255) inset, -1px -1px 0 rgb(128, 128, 128) inset;
+	box-shadow: 1px 1px 0 var(--ButtonHilight) inset, -1px -1px 0 var(--ButtonShadow) inset;
+}
+::-webkit-scrollbar-corner {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+}
+
+::-webkit-scrollbar-button {
+	background-color: rgb(192, 192, 192);
+	background-color: var(--ButtonFace);
+	border-top: 1px solid rgb(192, 192, 192);
+	border-top: 1px solid var(--ButtonFace);
+	border-left: 1px solid rgb(192, 192, 192);
+	border-left: 1px solid var(--ButtonFace);
+	border-right: 1px solid rgb(0, 0, 0);
+	border-right: 1px solid var(--ButtonDkShadow);
+	border-bottom: 1px solid rgb(0, 0, 0);
+	border-bottom: 1px solid var(--ButtonDkShadow);
+	box-shadow: 1px 1px 0 rgb(255, 255, 255) inset, -1px -1px 0 rgb(128, 128, 128) inset;
+	box-shadow: 1px 1px 0 var(--ButtonHilight) inset, -1px -1px 0 var(--ButtonShadow) inset;
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAW0lEQVQ4T2NkGGSAcZC5h4FWDvrPwEC02ShqkR0EkkAHuBxMyEKYWYQ8jKEOXQOyo/A5BuZwqqvBZiA+3xMbilQLIWqlcUJRimwPzjRELcdQZA6hREeR4eRoBgBoXhAK6oiMhwAAAABJRU5ErkJggg==");
+	background-image: var(--scrollbar-arrows-ButtonText);
+	image-rendering: pixelated;
+	width: 13px;
+	width: var(--scrollbar-size);
+	height: 13px;
+	height: var(--scrollbar-size);
+	box-sizing: border-box;
+}
+
+::-webkit-scrollbar-button:not(.disabled):hover:active {
+	border: 1px solid rgb(128, 128, 128);
+	border: 1px solid var(--ButtonShadow);
+	box-shadow: none;
+}
+
+::-webkit-scrollbar-button.disabled {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDmpoaPjf0NBAlNnoauGaQBLooYXLUEIWwswi5Chs6lB8gewofI6BOZwWajCCFZ/viQ1FqoUQtRI4oShFtgdnGqKWYyg1h6icQKklpOgHAM9mQArEvm5+AAAAAElFTkSuQmCC"), url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDvr///9/RkZGosxGVwvXBJJADy1chhKyEGYWIUdhU4fiC2RH4XMMzOG0UIMRrPh8T2woUi2EqJXACUUpsj040xC1HEOpOUTlBEotIUU/AKXFQAqyTJ6DAAAAAElFTkSuQmCC");
+	background-image: var(--scrollbar-arrows-GrayText), var(--scrollbar-arrows-ButtonHilight);
+}
+
+::-webkit-scrollbar-button.horizontal.decrement.disabled {
+	background-position: /* left arrow */
+		calc(9px * -3 + 1px) 1px,
+		calc(9px * -3 + 2px) 2px;
+	background-position: /* left arrow */
+		calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -3 + 2px) 2px;
+}
+
+::-webkit-scrollbar-button.horizontal.increment.disabled {
+	background-position: /* right arrow */
+		calc(9px * -2 + 1px) 1px,
+		calc(9px * -2 + 2px) 2px;
+	background-position: /* right arrow */
+		calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -2 + 2px) 2px;
+}
+
+::-webkit-scrollbar-button.vertical.decrement.disabled {
+	background-position: /* up arrow */
+		calc(9px * -1 + 1px) 1px,
+		calc(9px * -1 + 2px) 2px;
+	background-position: /* up arrow */
+		calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -1 + 2px) 2px;
+}
+
+::-webkit-scrollbar-button.vertical.increment.disabled {
+	background-position: /* down arrow */
+		calc(9px * -0 + 1px) 1px,
+		calc(9px * -0 + 2px) 2px;
+	background-position: /* down arrow */
+		calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -0 + 2px) 2px;
+}
+
+::-webkit-scrollbar-button.horizontal.decrement {
+	background-position: calc(9px * -3 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px;
+	/* left */
+}
+
+::-webkit-scrollbar-button.horizontal.increment {
+	background-position: calc(9px * -2 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px;
+	/* right */
+}
+
+::-webkit-scrollbar-button.vertical.decrement {
+	background-position: calc(9px * -1 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px;
+	/* up */
+}
+
+::-webkit-scrollbar-button.vertical.increment {
+	background-position: calc(9px * -0 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px;
+	/* down */
+}
+::-webkit-scrollbar-button:hover:active {
+	border: 1px solid rgb(128, 128, 128);
+	border: 1px solid var(--ButtonShadow);
+	box-shadow: none;
+}
+::-webkit-scrollbar-button:disabled {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDmpoaPjf0NBAlNnoauGaQBLooYXLUEIWwswi5Chs6lB8gewofI6BOZwWajCCFZ/viQ1FqoUQtRI4oShFtgdnGqKWYyg1h6icQKklpOgHAM9mQArEvm5+AAAAAElFTkSuQmCC"), url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAJCAYAAABaMo5wAAAAYElEQVQ4T2NkGGSAcZC5h4EmDvr///9/RkZGosxGVwvXBJJADy1chhKyEGYWIUdhU4fiC2RH4XMMzOG0UIMRrPh8T2woUi2EqJXACUUpsj040xC1HEOpOUTlBEotIUU/AKXFQAqyTJ6DAAAAAElFTkSuQmCC");
+	background-image: var(--scrollbar-arrows-GrayText), var(--scrollbar-arrows-ButtonHilight);
+}
+
+::-webkit-scrollbar-button:horizontal:decrement:disabled {
+	background-position: /* left arrow */
+		calc(9px * -3 + 1px) 1px,
+		calc(9px * -3 + 2px) 2px;
+	background-position: /* left arrow */
+		calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -3 + 2px) 2px;
+}
+::-webkit-scrollbar-button:horizontal:increment:disabled {
+	background-position: /* right arrow */
+		calc(9px * -2 + 1px) 1px,
+		calc(9px * -2 + 2px) 2px;
+	background-position: /* right arrow */
+		calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -2 + 2px) 2px;
+}
+::-webkit-scrollbar-button:vertical:decrement:disabled {
+	background-position: /* up arrow */
+		calc(9px * -1 + 1px) 1px,
+		calc(9px * -1 + 2px) 2px;
+	background-position: /* up arrow */
+		calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -1 + 2px) 2px;
+}
+::-webkit-scrollbar-button:vertical:increment:disabled {
+	background-position: /* down arrow */
+		calc(9px * -0 + 1px) 1px,
+		calc(9px * -0 + 2px) 2px;
+	background-position: /* down arrow */
+		calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -0 + 2px) 2px;
+}
+
+::-webkit-scrollbar-button:horizontal:decrement.disabled {
+	background-position: /* left arrow */
+		calc(9px * -3 + 1px) 1px,
+		calc(9px * -3 + 2px) 2px;
+	background-position: /* left arrow */
+		calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -3 + 2px) 2px;
+}
+
+::-webkit-scrollbar-button:horizontal:decrement {
+	background-position: calc(9px * -3 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -3 + 1px) 1px;
+	/* left */
+}
+::-webkit-scrollbar-button:horizontal:increment.disabled {
+	background-position: /* right arrow */
+		calc(9px * -2 + 1px) 1px,
+		calc(9px * -2 + 2px) 2px;
+	background-position: /* right arrow */
+		calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -2 + 2px) 2px;
+}
+::-webkit-scrollbar-button:horizontal:increment {
+	background-position: calc(9px * -2 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -2 + 1px) 1px;
+	/* right */
+}
+::-webkit-scrollbar-button:vertical:decrement.disabled {
+	background-position: /* up arrow */
+		calc(9px * -1 + 1px) 1px,
+		calc(9px * -1 + 2px) 2px;
+	background-position: /* up arrow */
+		calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -1 + 2px) 2px;
+}
+::-webkit-scrollbar-button:vertical:decrement {
+	background-position: calc(9px * -1 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -1 + 1px) 1px;
+	/* up */
+}
+::-webkit-scrollbar-button:vertical:increment.disabled {
+	background-position: /* down arrow */
+		calc(9px * -0 + 1px) 1px,
+		calc(9px * -0 + 2px) 2px;
+	background-position: /* down arrow */
+		calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px,
+		calc(var(--scrollbar-button-inner-size) * -0 + 2px) 2px;
+}
+::-webkit-scrollbar-button:vertical:increment {
+	background-position: calc(9px * -0 + 1px) 1px;
+	background-position: calc(var(--scrollbar-button-inner-size) * -0 + 1px) 1px;
+	/* down */
+}
+
+::-webkit-scrollbar-track-piece:hover:active {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVQYV2P8/////4MHDzIwHjhw4L+9vT0DAHAFCj6esq3FAAAAAElFTkSuQmCC") repeat;
+	background: var(--checker) repeat;
+	image-rendering: pixelated;
+	background-color: white;
+	background-blend-mode: difference;
+	/* background-attachment: fixed; breaks the checkered background in chrome */
+}
+
+::-webkit-scrollbar-track-piece.increment {
+	background-position: bottom;
+}
+::-webkit-scrollbar-track-piece:increment {
+	background-position: bottom;
+}
+
+/* turn off double buttons */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement {
+	display: none;
+}
+
+/*# sourceMappingURL=windows-98.css.map */</style></head>
+
+	<body scroll="no" onload="Init()">
+
+		<!-- start mini banner -->
+		<div id="MiniBanner" style="visibility: hidden; position: absolute; width: 100%; height: 32px; background: window">
+			<!-- using a table with nowrap to prevent word wrapping -->
+			<table><tbody><tr><td nowrap="">
+				<p class="Title" style="margin-top: 0">
+				<!--webbot bot="HTMLMarkup" startspan alt="&lt;B&gt;&lt;I&gt;Web View Folder Title&lt;/I&gt;&lt;/B&gt;&nbsp;" -->
+				(C:)
+				<!--webbot bot="HTMLMarkup" endspan -->
+			</p></td></tr></tbody></table>
+		</div>
+		<!-- end mini banner -->
+
+		<!-- start left info panel -->
+		<div id="Panel" style="background: url(&quot;https://98.js.org/src/WEB//wvleft.bmp&quot;) no-repeat white; visibility: visible;">
+			<p>
+			<object-hack classid="clsid:E5DF9D10-3B52-11D1-83E8-00A0C90DC849" width="32" height="32">
+				<param-hack name="scale" value="100">
+			</param-hack></object-hack>
+
+			</p><p class="Title">
+			<!--webbot bot="HTMLMarkup" startspan alt="&lt;B&gt;&lt;I&gt;Web View Folder Title&lt;/I&gt;&lt;/B&gt;&nbsp;" -->
+			(C:)
+			<!--webbot bot="HTMLMarkup" endspan -->
+			
+			</p><p class="LogoLine">
+			<img src="https://98.js.org/src/WEB//wvline.gif" width="100%" height="1px">
+			
+			</p><p>
+			<span id="Info">Select an item to view its description.</span>
+
+			<!-- HERE'S A GOOD PLACE TO ADD A FEW LINKS OF YOUR OWN -->
+			<!-- (examples commented out)
+				<p>
+				<br>
+				<a href="http://www.mylink1.com/">Custom Link 1</a>
+				<p class=Links>
+				<a href="http://www.mylink2.com/">Custom Link 2</a>
+			-->
+
+			</p><p>
+			<!-- this is the thumbnail viewer control -->
+			<object-hack id="Thumbnail" classid="clsid:1D2B4F40-1F10-11D1-9E88-00C04FDCAB92" style="display: none">
+			</object-hack>
+
+			<!-- this is the status message that pops up during thumbnail generation -->
+			</p><div id="Status" style="display: none">
+				Generating preview...
+			</div>
+			
+			<p>
+			<!-- this contains any ActiveMovie control created later -->
+			</p><div id="Media">
+			</div>
+			
+		</div>
+		<!-- end left info panel -->
+
+		<!-- this is the standard file list control -->
+		<!-- webbot bot="HTMLMarkup" startspan -->
+		<object-hack id="FileList" border="0" tabindex="1" classid="clsid:1820FED0-473E-11D0-A96C-00C04FD705A2" style="top: 0px;">
+		</object-hack>
+		<!-- webbot bot="HTMLMarkup" endspan -->
+
+	
+
+</body></html>
